@@ -10,9 +10,9 @@ CPAN
 =cut
 
 
-package Kmer;
+package Bio::Kmer;
 require 5.12.0;
-our VERSION="0.01";
+our $VERSION="0.01";
 
 use strict;
 use warnings;
@@ -78,9 +78,9 @@ Author: Lee Katz <lkatz@cdc.gov>
 
 =head1 METHODS
 
-=over
+=item new
 
-=item sub new
+=over
 
 Create a new instance of the kmer counter.  One object per file. 
 
@@ -138,7 +138,7 @@ sub new{
 
 =over
 
-=item sub count
+=item count
 
 Count kmers.  If Jellyfish is found, then it will be used. Otherwise, pure perl will be used which is slower.
 
@@ -177,7 +177,7 @@ sub count{
 
 =over
 
-=item sub histogram
+=item histogram
 
 Count kmers.  If Jellyfish is found, then it will be used. Otherwise, pure perl will be used which is slower.
 

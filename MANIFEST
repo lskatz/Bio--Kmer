@@ -1,3 +1,5 @@
 ./lib/Bio/Kmer.pm
 ./Makefile.PL
 ./MANIFEST
+./data/rand.fastq.gz
+./t/01_basic.t
