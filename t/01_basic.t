@@ -2,7 +2,7 @@ use strict;
 use warnings;
 use File::Basename qw/dirname/;
 
-use Test::More tests => 10;
+use Test::More tests => 11;
 
 use_ok 'Bio::Kmer';
 
@@ -11,7 +11,7 @@ $kmer->count();
 my $hist=$kmer->histogram();
 
 my @correctCounts=(
-  0
+  0,
   16087,
   17621,
   12868,
