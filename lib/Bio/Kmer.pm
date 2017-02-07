@@ -12,7 +12,7 @@ CPAN
 
 package Bio::Kmer;
 require 5.12.0;
-our $VERSION="0.02";
+our $VERSION="0.03";
 
 use strict;
 use warnings;
@@ -61,7 +61,7 @@ A module for helping with kmer analysis.
   use Bio::Kmer;
   
   my $kmer=Bio::Kmer->new("file.fastq.gz",{kmercounter=>"jellyfish",numcpus=>4});
-  my $kmerHash=$kmer->count();
+  my $kmerHash=$kmer->kmers();
   my $countOfCounts=$kmer->histogram();
 
 =head1 DESCRIPTION
