@@ -12,14 +12,14 @@ CPAN
 
 package Bio::Kmer;
 require 5.12.0;
-our $VERSION="0.01";
+our $VERSION="0.02";
 
 use strict;
 use warnings;
 
 use List::Util qw/max/;
 use File::Basename qw/basename fileparse dirname/;
-use File::Temp ('tempdir');
+use File::Temp qw/tempdir tempfile/;
 use Data::Dumper;
 use IO::Uncompress::Gunzip;
 
@@ -58,9 +58,9 @@ A module for helping with kmer analysis.
 
   use strict;
   use warnings;
-  use Kmer;
+  use Bio::Kmer;
   
-  my $kmer=Kmer->new("file.fastq.gz",{kmerCounter=>"jellyfish",numcpus=>4});
+  my $kmer=Bio::Kmer->new("file.fastq.gz",{kmercounter=>"jellyfish",numcpus=>4});
   my $kmerHash=$kmer->count();
   my $countOfCounts=$kmer->histogram();
 
@@ -78,9 +78,9 @@ Author: Lee Katz <lkatz@cdc.gov>
 
 =head1 METHODS
 
-=item new
-
 =over
+
+=item new
 
 Create a new instance of the kmer counter.  One object per file. 
 
@@ -99,7 +99,7 @@ Create a new instance of the kmer counter.  One object per file.
                           do not care about low-count kmers.
 
   Examples:
-  my $kmer=Kmer->new("file.fastq.gz",{kmerCounter=>"jellyfish",numcpus=>4});
+  my $kmer=Bio::Kmer->new("file.fastq.gz",{kmercounter=>"jellyfish",numcpus=>4});
 
 =back
 
@@ -115,7 +115,7 @@ sub new{
   $$settings{kmerlength}  ||=21;
   $$settings{numcpus}     ||=1;
   $$settings{gt}          ||=1;
-  $$settings{kmerCounter} ||="perl";
+  $$settings{kmercounter} ||="perl";
 
   # Initialize the object and then bless it
   my $self={
@@ -124,31 +124,32 @@ sub new{
     numcpus    =>$$settings{numcpus},
     tempdir    =>tempdir("Kmer.pm.XXXXXX",TMPDIR=>1,CLEANUP=>1),
     gt         =>$$settings{gt},
-    kmerCounter=>$$settings{kmerCounter},
+    kmercounter=>$$settings{kmercounter},
 
     # Values that will be filled in after analysis
-    kmers      =>{},
+    _kmers     =>{},
   };
+  # Add in some other temporary files
+  ($$self{kmerfileFh},$$self{kmerfile})      = tempfile("KMER.XXXXXX", DIR=>$$self{tempdir}, SUFFIX=>".tsv");
+  ($$self{histfileFh},$$self{histfile})      = tempfile("HIST.XXXXXX", DIR=>$$self{tempdir}, SUFFIX=>".tsv");
+  ($$self{jellyfishdbFh},$$self{jellyfishdb})= tempfile("JF.XXXXXX",   DIR=>$$self{tempdir}, SUFFIX=>".jf");
+
+  # Make some values lc
+  $$self{$_}=lc($$self{$_}) for(qw(kmercounter));
+
+  # Set an exact parameter for the kmer counter
+  if($$self{kmercounter}=~ /(pure)?.*perl/){
+    $$self{kmercounter}="perl";
+  } elsif($self->{kmercounter} =~ /jellyfish/){
+    $$self{kmercounter}="jellyfish";
+  }
+
   bless($self);
+
+  $self->count; # start off the kmer counting ASAP
 
   return $self;
 }
-
-=pod
-
-=over
-
-=item count
-
-Count kmers.  If Jellyfish is found, then it will be used. Otherwise, pure perl will be used which is slower.
-
-  Arguments: none
-  Returns:   Reference to a hash of kmers where the key is
-             the kmer, and the value is count
-
-=back
-
-=cut
 
 # Count kmers with faster programs in this order of
 # priority: jellyfish (TODO: KAnalyze)
@@ -161,16 +162,15 @@ sub count{
 
   my $kmerHash={};
 
-  if($self->{kmerCounter}=~ /(pure)?.*perl/i){
-    $kmerHash=$self->countKmersPurePerl($seqfile,$kmerlength);
-  } elsif($self->{kmerCounter} =~ /jellyfish/i){
-    $kmerHash=$self->countKmersJellyfish($seqfile,$kmerlength);
+  if($self->{kmercounter} eq "perl"){
+    $self->countKmersPurePerl($seqfile,$kmerlength);
+  } elsif($self->{kmercounter} eq "jellyfish"){
+    # TODO make JF DB file $self->{jellyfishDb} and do not return
+    # a kmer count
+    $self->countKmersJellyfish($seqfile,$kmerlength);
   } else {
-    die "ERROR: I do not understand the kmer counter $self->{kmerCounter}";
+    die "ERROR: I do not understand the kmer counter $self->{kmercounter}";
   }
-
-  $self->{kmers}=$kmerHash;
-  return $kmerHash;
 }
 
 =pod
@@ -179,7 +179,7 @@ sub count{
 
 =item histogram
 
-Count kmers.  If Jellyfish is found, then it will be used. Otherwise, pure perl will be used which is slower.
+Count the frequency of kmers.
 
   Arguments: none
   Returns:   Reference to an array of counts. The index of 
@@ -195,11 +195,11 @@ sub histogram{
   my @hist=(0); # initialize the histogram with a count of zero kmers happening zero times
   #$hist[0]=4**$self->{kmerlength}; # or maybe it should be initialized to the total number of possibilities.
 
-  if(!values(%{ $self->{kmers} } )){
-    die "ERROR: kmers have not been counted yet. Run Kmer->count before running Kmer->histogram";
-  }
+  #if(!values(%{ $self->{_kmers} } )){
+  #  die "ERROR: kmers have not been counted yet. Run Kmer->count before running Kmer->histogram";
+  #}
 
-  for my $kmercount(values(%{ $self->{kmers} } )){
+  for my $kmercount(values(%{ $self->kmers() } )){
     $hist{$kmercount}++;
   }
 
@@ -265,10 +265,46 @@ sub countKmersPurePerl{
     }
   }
 
-  # Filtering step
+  # Write everything to file. The FH should still be open.
+  #      Do not return the kmer.
+  #      Make a new method that returns the kmer hash
+  #      Do the same for jellyfish
+  my $fh=$self->{kmerfileFh};
   while(my($kmer,$count)=each(%kmer)){
-    delete($kmer{$kmer}) if($count < $self->{gt});
+    # Filtering step
+    if($count < $self->{gt}){
+      #delete($kmer{$kmer});
+      next;
+    }
+    
+    print $fh "$kmer\t$count\n";
   }
+  close $fh;
+
+  return 1;
+}
+
+sub kmers{
+  my($self)=@_;
+
+  return $self->{_kmers} if(keys(%{ $self->{_kmers} }) > 0);
+
+  # Dump the kmers to a tab delimited file if we are using
+  # jellyfish and the user invokes this method.
+  if($self->{kmercounter} eq "jellyfish"){
+    $self->_dumpKmersJellyfish();
+  }
+
+  my %kmer;
+  open(my $fh, $self->{kmerfile}) or die "ERROR: could not read the kmer file: $!";
+  while(<$fh>){
+    chomp;
+    my($kmer,$count)=split /\t/;
+    $kmer{$kmer}=$count;
+  }
+  close $fh;
+
+  $self->{_kmers}=\%kmer;
 
   return \%kmer;
 }
@@ -296,7 +332,6 @@ sub _countKmersPurePerlWorker{
 sub countKmersJellyfish{
   my($self,$seqfile,$kmerlength)=@_;
   my $basename=basename($seqfile);
-  my %kmer=();
 
   # Version checking
   my $jfVersion=`jellyfish --version`; chomp($jfVersion);
@@ -308,12 +343,10 @@ sub countKmersJellyfish{
     }
   }
   
-  my $outprefix="$self->{tempdir}/$basename.mer_counts";
-  my $jfDb="$self->{tempdir}/$basename.merged.jf";
-  my $kmerTsv="$self->{tempdir}/$basename.jf.tsv";
+  my $outfile=$self->{jellyfishdb};
 
   # Counting
-  my $jellyfishCountOptions="-s 10000000 -m $kmerlength -o $outprefix -t $self->{numcpus}";
+  my $jellyfishCountOptions="-s 10000000 -m $kmerlength -o $outfile -t $self->{numcpus}";
   my $uncompressedFastq="$self->{tempdir}/$basename.fastq";
   if($seqfile=~/\.gz$/i){
     system("zcat $seqfile > $uncompressedFastq"); die if $?;
@@ -322,26 +355,22 @@ sub countKmersJellyfish{
     system("jellyfish count $jellyfishCountOptions $seqfile");
   }
   die "Error: problem with jellyfish" if $?;
+}
 
-  my $lowerCount=$self->{gt}-1;
-  system("jellyfish dump --lower-count=$lowerCount --column --tab -o $kmerTsv $outprefix");
-  die if $?;
+sub _dumpKmersJellyfish{
+  my($self)=@_;
+  my $kmerTsv=$self->{kmerfile};
+  my $jfDb=$self->{jellyfishdb};
 
-  # Load kmers to memory
-  open(TSV,$kmerTsv) or die "ERROR: Could not open $kmerTsv: $!";
-  while(<TSV>){
-    chomp;
-    my @F=split /\t/;
-    $kmer{$F[0]}=$F[1];
+  return if(-s $kmerTsv > 0);
+
+  # Dump the kmers to a tab-delimited file if it doesn't
+  # already have contents
+  if(-s $kmerTsv < 1){
+    my $lowerCount=$self->{gt}-1;
+    system("jellyfish dump --lower-count=$lowerCount --column --tab -o $kmerTsv $jfDb");
+    die if $?;
   }
-  close TSV;
-
-  # cleanup
-  for($jfDb, $kmerTsv, $outprefix, $uncompressedFastq){
-    unlink $_ if($_ && -e $_);
-  }
-
-  return \%kmer;
 }
 
 # http://www.perlmonks.org/?node_id=761662
