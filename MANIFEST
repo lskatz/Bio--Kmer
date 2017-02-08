@@ -3,3 +3,4 @@
 ./MANIFEST
 ./data/rand.fastq.gz
 ./t/01_basic.t
+README.pod
