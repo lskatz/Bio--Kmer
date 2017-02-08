@@ -1,6 +1,6 @@
-./lib/Bio/Kmer.pm
-./Makefile.PL
-./MANIFEST
-./data/rand.fastq.gz
-./t/01_basic.t
+data/rand.fastq.gz
+lib/Bio/Kmer.pm
+Makefile.PL
+MANIFEST			This list of files
 README.pod
+t/01_basic.t

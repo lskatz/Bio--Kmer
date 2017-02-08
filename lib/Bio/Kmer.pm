@@ -49,7 +49,7 @@ local $SIG{'__DIE__'} = sub { my $e = $_[0]; $e =~ s/(at [^\s]+? line \d+\.$)/\n
 
 =head1 NAME
 
-Kmer
+Bio::Kmer
 
 =head1 SYNOPSIS
 
