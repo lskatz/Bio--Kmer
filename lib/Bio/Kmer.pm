@@ -10,9 +10,8 @@ CPAN
 =cut
 
 
-package Bio::Kmer;
+package Bio::Kmer 0.04;
 require 5.12.0;
-our $VERSION="0.03";
 
 use strict;
 use warnings;
@@ -173,6 +172,25 @@ sub count{
   }
 }
 
+sub query{
+  my($self,$query)=@_;
+
+  my $count=0;
+  if($self->{kmercounter} eq "perl"){
+    my $kmers=$self->kmers();
+    $count=$$kmers{uc($query)} || 0;
+  } elsif($self->{kmercounter} eq "jellyfish"){
+    open(my $queryFh, "jellyfish query ".$self->{jellyfishdb}." |") or die "ERROR: could not run jellyfish query: $!";
+    my $db=$self->{jellyfishdb};
+    my $tmp=`jellyfish query $db $query`;
+    die "ERROR: could not run jellyfish query" if $?;
+    chomp($tmp);
+    (undef,$count)=split(/\s+/,$tmp);
+  }
+  
+  return $count;
+}
+
 =pod
 
 =over
@@ -231,7 +249,7 @@ sub countKmersPurePerl{
   while(<$fastqFh>){ # burn the read ID line
     $i++;
     my $seq=<$fastqFh>;
-    push(@buffer, $seq);
+    push(@buffer, uc($seq));
 
     if($i % 1000000 == 0){
       $seqQ->enqueue(@buffer);
@@ -354,6 +372,7 @@ sub countKmersJellyfish{
   } else {
     system("jellyfish count $jellyfishCountOptions $seqfile");
   }
+  close $self->{jellyfishdbFh};
   die "Error: problem with jellyfish" if $?;
 }
 
