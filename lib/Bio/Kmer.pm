@@ -10,7 +10,7 @@ CPAN
 =cut
 
 
-package Bio::Kmer 0.05;
+package Bio::Kmer 0.06;
 require 5.12.0;
 
 use strict;
