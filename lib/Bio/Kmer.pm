@@ -10,7 +10,7 @@ CPAN
 =cut
 
 
-package Bio::Kmer 0.04;
+package Bio::Kmer 0.05;
 require 5.12.0;
 
 use strict;
@@ -66,12 +66,6 @@ A module for helping with kmer analysis.
 =head1 DESCRIPTION
 
 A module for helping with kmer analysis. The basic methods help count kmers and can produce a count of counts.  Currently this module only supports fastq format.  Although this module can count kmers with pure perl, it is recommended to give the option for a different kmer counter such as Jellyfish.
-
-=head1 AUTHOR
-
-Author: Lee Katz <lkatz@cdc.gov>
-
-=cut
 
 =pod
 
@@ -172,8 +166,29 @@ sub count{
   }
 }
 
+=pod
+
+=over
+
+=item query
+
+Query the set of kmers with your own query
+
+  Arguments: query (string)
+  Returns:   Count of kmers. 
+              0 indicates that the kmer was not found.
+             -1 indicates an invalid kmer (e.g., invalid length)
+
+=back
+
+=cut
+
 sub query{
   my($self,$query)=@_;
+
+  if(length($query) != $self->{kmerlength}){
+    return -1;
+  }
 
   my $count=0;
   if($self->{kmercounter} eq "perl"){
@@ -445,5 +460,19 @@ sub closeFastq{
   close $fastq;
   return 1;
 }
+
+=pod
+
+=head1 COPYRIGHT AND LICENSE
+
+MIT license.  Go nuts.
+
+=head1 AUTHOR
+
+Author: Lee Katz <lkatz@cdc.gov>
+
+For additional help, go to https://github.com/lskatz/Bio--Kmer
+
+=cut
 
 1;

@@ -2,7 +2,7 @@ use strict;
 use warnings;
 use File::Basename qw/dirname/;
 
-use Test::More tests => 25;
+use Test::More tests => 29;
 
 use_ok 'Bio::Kmer';
 
@@ -25,6 +25,8 @@ my @correctCounts=(
 my %query=(
   TTGGAGCA => 3,
   TTGGAGCT => 6,
+  TTGGAGCTA=> -1, # invalid
+  AAAAAAAA => 0,  # not found
 );
 
 # Pure perl
