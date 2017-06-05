@@ -354,6 +354,10 @@ Count the frequency of kmers.
 sub union{
   my($self,$other)=@_;
   
+  if(!$self->_checkCompatibility($other,{verbose=>1})){
+    die;
+  }
+
   # See what kmers are in common using hashes
   my %union;
   my $kmer1 = $self->kmers;
@@ -383,6 +387,10 @@ Count the frequency of kmers.
 sub intersection{
   my($self,$other)=@_;
 
+  if(!$self->_checkCompatibility($other,{verbose=>1})){
+    die;
+  }
+
   my @intersection;
   my $kmer2 = $other->kmers;
   for my $kmer(keys(%{ $self->kmers })){
@@ -392,6 +400,19 @@ sub intersection{
   }
 
   return \@intersection;
+}
+
+# See if another Bio::Kmer is the same kind as this one.
+# Return Boolean
+sub _checkCompatibility{
+  my($self,$other,$settings)=@_;
+
+  if($self->{kmerlength} != $other->{kmerlength}){
+    warn "WARNING: kmer lengths do not match\n" if($$settings{verbose});
+    return 0;
+  }
+
+  return 1;
 }
 
 sub _countKmersPurePerlWorker{
