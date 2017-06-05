@@ -74,7 +74,7 @@ A module for helping with kmer analysis. The basic methods help count kmers and 
 
 =over
 
-=item new
+=item Bio::Kmer->new($filename, \%options)
 
 Create a new instance of the kmer counter.  One object per file. 
 
@@ -171,7 +171,7 @@ sub count{
 
 =over
 
-=item query
+=item $kmer->query($queryString)
 
 Query the set of kmers with your own query
 
@@ -211,7 +211,7 @@ sub query{
 
 =over
 
-=item histogram
+=item $kmer->histogram()
 
 Count the frequency of kmers.
 
@@ -343,15 +343,63 @@ sub kmers{
   return \%kmer;
 }
 
+=pod
+
+=over
+
+=item $kmer->union($kmer2)
+
+Count the frequency of kmers.
+
+  Arguments: Another Bio::Kmer object
+  Returns:   List of kmers
+
+=back
+
+=cut
+
 sub union{
   my($self,$other)=@_;
   
   # See what kmers are in common using hashes
-  for my $kmer(keys(%{ $self->kmers })){
-    print $kmer; die;
+  my %union;
+  my $kmer1 = $self->kmers;
+  my $kmer2 = $other->kmers;
+  for my $kmer(keys(%{ $self->kmers }), keys(%{ $other->kmers })){
+    $union{$kmer}=1;
   }
+
+  return [keys(%union)];
 }
 
+=pod
+
+=over
+
+=item $kmer->union($kmer2)
+
+Count the frequency of kmers.
+
+  Arguments: Another Bio::Kmer object
+  Returns:   List of kmers
+
+=back
+
+=cut
+
+sub intersection{
+  my($self,$other)=@_;
+
+  my @intersection;
+  my $kmer2 = $other->kmers;
+  for my $kmer(keys(%{ $self->kmers })){
+    if($$kmer2{$kmer}){
+      push(@intersection, $kmer);
+    }
+  }
+
+  return \@intersection;
+}
 
 sub _countKmersPurePerlWorker{
   my($kmerlength,$seqQ)=@_; 
