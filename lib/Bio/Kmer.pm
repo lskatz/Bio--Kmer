@@ -10,8 +10,9 @@ CPAN
 =cut
 
 
-package Bio::Kmer 0.07;
-require 5.12.0;
+package Bio::Kmer;
+require 5.10.0;
+our $VERSION=0.09;
 
 use strict;
 use warnings;
@@ -341,6 +342,16 @@ sub kmers{
 
   return \%kmer;
 }
+
+sub union{
+  my($self,$other)=@_;
+  
+  # See what kmers are in common using hashes
+  for my $kmer(keys(%{ $self->kmers })){
+    print $kmer; die;
+  }
+}
+
 
 sub _countKmersPurePerlWorker{
   my($kmerlength,$seqQ)=@_; 
