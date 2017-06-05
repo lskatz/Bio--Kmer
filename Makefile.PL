@@ -14,7 +14,7 @@ my $preop =
 WriteMakefile
 (
   NAME         => 'Bio::Kmer',
-  VERSION_FROM => 'lib/perl5/Bio/Kmer.pm',
+  VERSION_FROM => 'lib/Bio/Kmer.pm',
   PREREQ_PM    => {
     'File::Basename' => 0,
     'File::Temp'     => 0,
