@@ -3,13 +3,6 @@
 # Kmer.pm: a kmer counting module
 # Author: Lee Katz <lkatz@cdc.gov>
 
-=pod SCRIPT CATEGORIES
-
-CPAN
-
-=cut
-
-
 package Bio::Kmer;
 require 5.10.0;
 our $VERSION=0.09;
