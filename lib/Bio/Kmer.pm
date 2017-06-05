@@ -5,7 +5,7 @@
 
 package Bio::Kmer;
 require 5.10.0;
-our $VERSION=0.09;
+our $VERSION=0.10;
 
 use strict;
 use warnings;
