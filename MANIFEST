@@ -1,6 +1,8 @@
 data/rand.fastq.gz
-lib/Bio/Kmer.pm
+data/rand2.fastq.gz
+lib/perl5/Bio/Kmer.pm
 Makefile.PL
 MANIFEST			This list of files
 README.pod
 t/01_basic.t
+t/02_setOperations.t
