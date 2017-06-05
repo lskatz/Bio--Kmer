@@ -4,6 +4,13 @@ use warnings;
 use 5.008;
  
 use ExtUtils::MakeMaker;
+
+# Some help from 
+# http://blogs.perl.org/users/michal_wojciechowski/2011/11/github-friendly-readme-files-with-extutils-makemaker-and-module-build.html
+my $preop =
+  'perldoc -uT $(VERSION_FROM) | tee $(DISTVNAME)/README.pod > README.pod;' .
+  'pod2text README.pod | tee $(DISTVNAME)/README > README';
+
 WriteMakefile
 (
   NAME         => 'Bio::Kmer',
@@ -20,6 +27,11 @@ WriteMakefile
   },
   BUILD_REQUIRES => {
     'Test::More'     => 0.47,
+  },
+  dist           => {
+    COMPRESS => "gzip -9f",
+    SUFFIX   => "gz",
+    PREOP    => $preop,
   },
 );
 
