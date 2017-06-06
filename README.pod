@@ -107,7 +107,7 @@ Finds the union between two sets of kmers
 
 =over
 
-=item $kmer->union($kmer2)
+=item $kmer->intersection($kmer2)
 
 Finds the intersection between two sets of kmers
 
