@@ -93,7 +93,7 @@ Count the frequency of kmers.
 
 =item $kmer->union($kmer2)
 
-Count the frequency of kmers.
+Finds the union between two sets of kmers
 
   Arguments: Another Bio::Kmer object
   Returns:   List of kmers
@@ -109,7 +109,23 @@ Count the frequency of kmers.
 
 =item $kmer->union($kmer2)
 
-Count the frequency of kmers.
+Finds the intersection between two sets of kmers
+
+  Arguments: Another Bio::Kmer object
+  Returns:   List of kmers
+
+=back
+
+
+=cut
+
+=pod
+
+=over
+
+=item $kmer->subtract($kmer2)
+
+Finds the set of kmers unique to this Bio::Kmer object.
 
   Arguments: Another Bio::Kmer object
   Returns:   List of kmers
