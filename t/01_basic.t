@@ -5,7 +5,7 @@ use FindBin qw/$RealBin/;
 
 use Test::More tests => 29;
 
-use lib "$RealBin/../lib/perl5";
+use lib "$RealBin/../lib";
 use_ok 'Bio::Kmer';
 
 # expected histogram

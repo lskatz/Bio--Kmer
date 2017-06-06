@@ -3,9 +3,9 @@ use warnings;
 use File::Basename qw/dirname/;
 use FindBin qw/$RealBin/;
 
-use Test::More tests => 4;
+use Test::More tests => 5;
 
-use lib "$RealBin/../lib/perl5";
+use lib "$RealBin/../lib";
 use_ok 'Bio::Kmer';
 
 # Pure perl
@@ -20,6 +20,8 @@ eval{
 };
 is $$invalidKmer[0], "-1", "Correctly identified incompatible kmer objects";
 
+my $subtraction = $kmer1->subtract($kmer2);
+is scalar(@$subtraction), 24159, "Subtraction of kmers";
 
 my $intersection = $kmer1->intersection($kmer2);
 is scalar(@$intersection), 33948, "Intersection of all kmers";

@@ -5,7 +5,7 @@
 
 package Bio::Kmer;
 require 5.10.0;
-our $VERSION=0.10;
+our $VERSION=0.11;
 
 use strict;
 use warnings;
@@ -342,7 +342,7 @@ sub kmers{
 
 =item $kmer->union($kmer2)
 
-Count the frequency of kmers.
+Finds the union between two sets of kmers
 
   Arguments: Another Bio::Kmer object
   Returns:   List of kmers
@@ -375,7 +375,7 @@ sub union{
 
 =item $kmer->union($kmer2)
 
-Count the frequency of kmers.
+Finds the intersection between two sets of kmers
 
   Arguments: Another Bio::Kmer object
   Returns:   List of kmers
@@ -401,6 +401,38 @@ sub intersection{
 
   return \@intersection;
 }
+
+=pod
+
+=over
+
+=item $kmer->subtract($kmer2)
+
+Finds the set of kmers unique to this Bio::Kmer object.
+
+  Arguments: Another Bio::Kmer object
+  Returns:   List of kmers
+
+=back
+
+=cut
+
+sub subtract{
+  my($self,$other)=@_;
+
+  if(!$self->_checkCompatibility($other,{verbose=>1})){
+    die;
+  }
+
+  my %subtractKmers = %{ $self->kmers };
+  for my $kmer(keys(%{ $other->kmers })){
+    delete($subtractKmers{$kmer});
+  }
+  
+  return [keys(%subtractKmers)];
+}
+      
+  
 
 # See if another Bio::Kmer is the same kind as this one.
 # Return Boolean
