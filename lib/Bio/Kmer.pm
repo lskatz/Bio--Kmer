@@ -578,6 +578,10 @@ Author: Lee Katz <lkatz@cdc.gov>
 
 For additional help, go to https://github.com/lskatz/Bio--Kmer
 
+CPAN module at http://search.cpan.org/~lskatz/Bio-Kmer/
+
+=for html <a href="https://travis-ci.org/lskatz/Bio--Kmer"><img src="https://travis-ci.org/lskatz/Bio--Kmer.svg?branch=master"></a>
+
 =cut
 
 1;
