@@ -5,7 +5,7 @@
 
 package Bio::Kmer;
 require 5.10.0;
-our $VERSION=0.11;
+our $VERSION=0.12;
 
 use strict;
 use warnings;
@@ -373,7 +373,7 @@ sub union{
 
 =over
 
-=item $kmer->union($kmer2)
+=item $kmer->intersection($kmer2)
 
 Finds the intersection between two sets of kmers
 
