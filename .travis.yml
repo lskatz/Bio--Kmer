@@ -1,6 +1,6 @@
 language: perl
 perl: 5.24-shrplib
-env: PATH=jellyfish-2.2.6:$PATH
+env: PATH=./bin/:$PATH
 before_install:
   - "pwd && echo $PATH"
   - "wget https://github.com/gmarcais/Jellyfish/releases/download/v2.2.6/jellyfish-2.2.6.tar.gz"
