@@ -12,4 +12,4 @@ before_install:
   - "tar zxvf jellyfish-2.2.6.tar.gz"
   - "cd jellyfish-2.2.6/ && ./configure --prefix=`pwd` && make -j 1 && make install"
   # bootstrap modules needed to manipulate dist
-  - "yes no | cpanm --force --notest Bio::Perl"
+  #- "yes no | cpanm --force --notest Bio::Perl"
