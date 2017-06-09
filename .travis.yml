@@ -1,15 +1,16 @@
 language: perl
-perl:
-  - "5.24-shrplib"
-  - "5.22-shrplib"
-  - "5.20-shrplib"
-  - "5.18-shrplib"
+perl: 5.24-shrplib
+#  - "5.24-shrplib"
+#  - "5.22-shrplib"
+#  - "5.20-shrplib"
+#  - "5.18-shrplib"
 #env: PERL_CPANM_OPT="--notest --force --skip-satisfied" PATH=$PATH:jellyfish-2.2.6
-env: PATH=$PATH:jellyfish-2.2.6
+env: PATH=jellyfish-2.2.6:$PATH
 before_install:
   - "pwd && echo $PATH"
   - "wget https://github.com/gmarcais/Jellyfish/releases/download/v2.2.6/jellyfish-2.2.6.tar.gz"
   - "tar zxvf jellyfish-2.2.6.tar.gz"
   - "cd jellyfish-2.2.6/ && ./configure --prefix=`pwd` && make -j 1 && make install"
+  - "which jellyfish";
   # bootstrap modules needed to manipulate dist
   #- "yes no | cpanm --force --notest Bio::Perl"
