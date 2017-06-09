@@ -6,4 +6,4 @@ before_install:
   - "wget https://github.com/gmarcais/Jellyfish/releases/download/v2.2.6/jellyfish-2.2.6.tar.gz"
   - "tar zxvf jellyfish-2.2.6.tar.gz"
   - "cd jellyfish-2.2.6/ && ./configure --prefix=`pwd` && make -j 1 && make install"
-  - "which jellyfish";
+  - "which jellyfish"
