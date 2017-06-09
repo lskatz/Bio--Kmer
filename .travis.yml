@@ -1,9 +1,10 @@
 language: perl
 perl: 5.24-shrplib
-env: PATH=./bin/:$PATH
+env: PATH=./bin:$PATH PERL_CPANM_OPT="--notest --force --skip-satisfied"
 before_install:
   - "pwd && echo $PATH"
   - "wget https://github.com/gmarcais/Jellyfish/releases/download/v2.2.6/jellyfish-2.2.6.tar.gz"
   - "tar zxvf jellyfish-2.2.6.tar.gz"
   - "cd jellyfish-2.2.6/ && ./configure --prefix=`pwd` && make -j 1 && make install"
-  - "find . -type f -name jellyfish; which jellyfish"
+  - "which jellyfish"
+  - "ls bin"
