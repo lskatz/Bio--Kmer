@@ -218,13 +218,43 @@ Count the frequency of kmers.
 
 sub histogram{
   my($self)=@_;
+
+  if($self->{kmercounter} eq "jellyfish"){
+    return $self->histogramJellyfish();
+  } else {
+    return $self->histogramPerl();
+  }
+}
+
+sub histogramJellyfish{
+  my($self)=@_;
+  
+  close $self->{histfileFh};
+
+  # Run jellyfish histo
+  my $jellyfishXopts = join(" ","-t", $self->{numcpus}, "-o", $self->{histfile}, $self->{jellyfishdb});
+  system("jellyfish histo $jellyfishXopts");
+  die "ERROR with jellyfish histo" if $?;
+  
+  # Read the output file
+  my @hist=(0);
+  open(my $fh, $self->{histfile}) or die "ERROR: reading $self->{histfile}: $!";
+  while(<$fh>){
+    s/^\s+|\s+$//g;
+    my($count, $countOfCounts)=split /\s+/;
+    $hist[$count]=$countOfCounts;
+  }
+  close $fh;
+
+  return \@hist;
+}
+
+sub histogramPerl{
+  my($self)=@_;
   my %hist=();
+
   my @hist=(0); # initialize the histogram with a count of zero kmers happening zero times
   #$hist[0]=4**$self->{kmerlength}; # or maybe it should be initialized to the total number of possibilities.
-
-  #if(!values(%{ $self->{_kmers} } )){
-  #  die "ERROR: kmers have not been counted yet. Run Kmer->count before running Kmer->histogram";
-  #}
 
   for my $kmercount(values(%{ $self->kmers() } )){
     $hist{$kmercount}++;
