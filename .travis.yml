@@ -1,17 +1,10 @@
 language: perl
 perl: 5.18-shrplib
 #env: PERL_CPANM_OPT="--mirror http://cpan.mirrors.travis-ci.org  --mirror http://cpan.cpantesters.org/ --mirror http://search.cpan.org/CPAN --cascade-search --local-lib . --notest --force --skip-satisfied" PATH=./bin:$PATH PERL5LIB=$PERL5LIB:lib/perl5
-env: PERL_CPANM_OPT="--verbose --notest --force --skip-satisfied --local-lib=blah"
+env: PERL_CPANM_OPT="--verbose --notest --force --skip-satisfied --local-lib=blah" 
 before_install:
-  #- "sudo apt-get install tree"
-  #- "pwd && echo $PATH && echo $PERL_CPANM_OPT"
-  #- "cpanm -l blah Bio::Kmer; tree; exit 1;"
   - "wget https://github.com/gmarcais/Jellyfish/releases/download/v2.2.6/jellyfish-2.2.6.tar.gz"
   - "tar zxvf jellyfish-2.2.6.tar.gz"
   - "cd jellyfish-2.2.6/ && ./configure --prefix=`pwd` && make -j 2 && make install && cd -"
-  - "export PATH=$PATH:bin"
-  - "echo $PERL_CPANM_OPT"
-  - "echo $PERL5LIB"
-  #- "which jellyfish"
-  #- "ls bin"
-  #- "ls blah"
+  - "export PATH=$PATH:`pwd`/jellyfish-2.2.6/bin"
+  - "which jellyfish"
