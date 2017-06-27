@@ -57,6 +57,31 @@ SKIP:{
   }
 }
 
+# Test JellyFish
+SKIP:{
+  my $jfVersion=`jellyfish --version`; chomp($jfVersion);
+  # e.g., jellyfish 2.2.6
+  if($jfVersion =~ /(jellyfish\s+)?(\d+)?/){
+    my $majorVersion=$2;
+    if($majorVersion < 2){
+      warn "WARNING: Jellyfish v2 or greater is required";
+      skip("Jellyfish test", 14);
+    }
+  }
+  if(!$jfVersion){
+    skip("Jellyfish test.", 14);
+  }
+
+  my $kmerJf=Bio::Kmer->new(dirname($0)."/../data/rand.fastq.gz",{kmerlength=>8, kmercounter=>"jellyfish"});
+  my $histJf=$kmerJf->histogram();
+  for(my $i=0;$i<@correctCounts;$i++){
+    is $$histJf[$i], $correctCounts[$i], "Freq of $i checks out";
+  }
+  for my $query(keys(%query)){
+    is $query{$query}, $kmerJf->query($query), "Queried for $query{$query}";
+  }
+}
+
 
 # Pure perl
 my $kmer=Bio::Kmer->new(dirname($0)."/../data/rand.fastq.gz",{kmerlength=>8});
@@ -66,15 +91,5 @@ for(my $i=0;$i<@correctCounts;$i++){
 }
 for my $query(keys(%query)){
   is $query{$query}, $kmer->query($query), "Queried for $query{$query}";
-}
-
-# Test JF
-my $kmerJf=Bio::Kmer->new(dirname($0)."/../data/rand.fastq.gz",{kmerlength=>8, kmercounter=>"jellyfish"});
-my $histJf=$kmerJf->histogram();
-for(my $i=0;$i<@correctCounts;$i++){
-  is $$histJf[$i], $correctCounts[$i], "Freq of $i checks out";
-}
-for my $query(keys(%query)){
-  is $query{$query}, $kmerJf->query($query), "Queried for $query{$query}";
 }
 
