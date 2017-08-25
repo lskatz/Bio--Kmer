@@ -5,7 +5,7 @@
 
 package Bio::Kmer;
 require 5.10.0;
-our $VERSION=0.19;
+our $VERSION=0.20;
 
 use strict;
 use warnings;
@@ -398,6 +398,22 @@ sub countKmersPurePerl{
 
   return 1;
 }
+
+=pod
+
+=over
+
+=item $kmer->kmers
+
+Return actual kmers
+
+  Arguments: None
+  Returns:   Reference to a hash of kmers and their counts
+
+=back
+
+=cut
+
 
 sub kmers{
   my($self)=@_;
