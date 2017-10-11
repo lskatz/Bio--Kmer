@@ -44,7 +44,7 @@ local $SIG{'__DIE__'} = sub { my $e = $_[0]; $e =~ s/(at [^\s]+? line \d+\.$)/\n
 
 =head1 NAME
 
-Bio::Kmer
+Bio::Kmer - Helper module for Kmer Analysis.
 
 =head1 SYNOPSIS
 
