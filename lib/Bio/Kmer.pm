@@ -359,8 +359,9 @@ sub countKmersPurePerl{
   # Multithreading
   my @thr;
   for(0..$self->{numcpus}-1){
-    my @threadSeqs = splice(@allSeqs, $numSeqsPerThread);
-    $thr[$_]=threads->new(\&_countKmersPurePerlWorker,$kmerlength,\@allSeqs,$self->{sample});
+    my @threadSeqs = splice(@allSeqs, 0, $numSeqsPerThread);
+    $thr[$_]=threads->new(\&_countKmersPurePerlWorker,$kmerlength,\@threadSeqs,$self->{sample});
+    #print STDERR "Kicking off thread ".$thr[$_]->tid." with ".scalar(@threadSeqs)." sequences\n";
   }
   
   # Join the threads and put everything into a large kmer hash
