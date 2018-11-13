@@ -5,7 +5,7 @@
 
 package Bio::Kmer;
 require 5.10.0;
-our $VERSION=0.21;
+our $VERSION=0.22;
 
 use strict;
 use warnings;
@@ -333,49 +333,36 @@ sub histogramPerl{
   return \@hist;
 }
 
+# Pure perl to make this standalone... the only reason
+# we are counting kmers in Perl instead of C.
 sub countKmersPurePerl{
   my($self,$seqfile,$kmerlength)=@_;
 
-  # Multithreading
-  my $seqQ=Thread::Queue->new;
-  my @thr;
-  for(0..$self->{numcpus}-1){
-    $thr[$_]=threads->new(\&_countKmersPurePerlWorker,$kmerlength,$seqQ,$self->{sample});
-  }
+  my @allSeqs;
 
-  # Pure perl to make this standalone... the only reason
-  # we are counting kmers in Perl instead of C.
+  # Save all seqs to an array, for passing out to individual threads.
   my $fastqFh=$self->openFastq($seqfile);
   my $i=0;
   my @buffer=();
   while(<$fastqFh>){ # burn the read ID line
     $i++;
     my $seq=<$fastqFh>;
-    push(@buffer, uc($seq));
-
-    if($i % 1000000 == 0){
-      $seqQ->enqueue(@buffer);
-      @buffer=();
-    }
-    
+    push(@allSeqs, uc($seq));
     # Burn the quality score lines
     <$fastqFh>;
     <$fastqFh>;
   }
   close $fastqFh;
 
-  $seqQ->enqueue(@buffer);
-  
-  # Send the termination signal
-  $seqQ->enqueue(undef) for(@thr);
+  my $numSeqsPerThread = int(scalar(@allSeqs)/$self->{numcpus}) + 1;
 
-  while($seqQ->pending > @thr){
-    for(1..60){
-      last if($seqQ->pending <= @thr);
-      sleep 1;
-    }
+  # Multithreading
+  my @thr;
+  for(0..$self->{numcpus}-1){
+    my @threadSeqs = splice(@allSeqs, $numSeqsPerThread);
+    $thr[$_]=threads->new(\&_countKmersPurePerlWorker,$kmerlength,\@allSeqs,$self->{sample});
   }
-
+  
   # Join the threads and put everything into a large kmer hash
   my %kmer=();
   for(@thr){
@@ -557,10 +544,10 @@ sub _checkCompatibility{
 }
 
 sub _countKmersPurePerlWorker{
-  my($kmerlength,$seqQ,$sample)=@_; 
+  my($kmerlength,$seqArr,$sample)=@_; 
 
   my %kmer;
-  while(defined(my $seq=$seqQ->dequeue)){
+  for my $seq(@$seqArr){
 
     my $numKmersInRead=length($seq)-$kmerlength;
 
