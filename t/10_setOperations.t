@@ -15,13 +15,16 @@ my $kmer2=Bio::Kmer->new(dirname($0)."/../data/rand2.fastq.gz",{kmerlength=>8});
 my $kmer3=Bio::Kmer->new(dirname($0)."/../data/rand2.fastq.gz",{kmerlength=>7});
 
 my $subtraction = $kmer1->subtract($kmer2);
+diag "Subtraction of kmers: ".scalar(@$subtraction);
 is scalar(@$subtraction), 24159, "Subtraction of kmers";
 
 my $intersection = $kmer1->intersection($kmer2);
+diag "Intersection of kmers: ".scalar(@$intersection);
 is scalar(@$intersection), 33948, "Intersection of all kmers";
 
 my $union = $kmer1->union($kmer2);
 
+diag "union: ".scalar(@$union);
 is scalar(@$union), 62362, "Union of all kmers";
 
 diag "Testing to make sure there is a warning for incompatible kmer sets";
