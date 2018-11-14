@@ -394,7 +394,7 @@ sub countKmersPurePerl{
     }
     logmsg "Done";
   }
-  #logmsg "Done merging";
+  logmsg Dumper \%kmer;
 
   # Write everything to file. The FH should still be open.
   #      Do not return the kmer.
@@ -402,6 +402,7 @@ sub countKmersPurePerl{
   #      Do the same for jellyfish
   my $fh=$self->{kmerfileFh};
   while(my($kmer,$count)=each(%kmer)){
+    logmsg "$kmer\t$count";
     # Filtering step
     if($count < $self->{gt}){
       #delete($kmer{$kmer});
