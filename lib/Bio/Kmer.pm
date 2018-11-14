@@ -354,6 +354,7 @@ sub countKmersPurePerl{
 
   # Save all seqs to an array, for passing out to individual threads.
   my $fastqFh=$self->openFastq($seqfile);
+  logmsg "Line ".__LINE__." in Bio::Kmer";
   my $i=0;
   my @buffer=();
   while(<$fastqFh>){ # burn the read ID line
@@ -365,6 +366,7 @@ sub countKmersPurePerl{
     <$fastqFh>;
   }
   close $fastqFh;
+  logmsg "Line ".__LINE__." in Bio::Kmer";
 
   # The number of sequences per thread is divided evenly but cautions
   # toward having one extra sequence per thread in the first threads
@@ -378,18 +380,19 @@ sub countKmersPurePerl{
     my @threadSeqs = splice(@allSeqs, 0, $numSeqsPerThread);
     # Set up a place for kmers to land
     $thr[$_]=threads->new(\&_countKmersPurePerlWorker,$kmerlength,\@threadSeqs,$self->{sample});
-    #logmsg "Kicking off thread ".$thr[$_]->tid." with ".scalar(@threadSeqs)." sequences";
+    logmsg "Kicking off thread ".$thr[$_]->tid." with ".scalar(@threadSeqs)." sequences";
   }
+  logmsg "Line ".__LINE__." in Bio::Kmer";
   
   # Join the threads and put everything into a large kmer hash
   my %kmer;
   for(@thr){
-    #logmsg "Joining ".$_->tid;
+    logmsg "Joining ".$_->tid;
     my $kmerArr =  $_->join;
     for my $kmer(@$kmerArr){
       $kmer{$kmer}++;
     }
-    #logmsg "Done";
+    logmsg "Done";
   }
   #logmsg "Done merging";
 
@@ -408,6 +411,7 @@ sub countKmersPurePerl{
     print $fh "$kmer\t$count\n";
   }
   close $fh;
+  logmsg "Line ".__LINE__." in Bio::Kmer";
 
   return 1;
 }
