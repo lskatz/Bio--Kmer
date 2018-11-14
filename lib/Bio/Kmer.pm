@@ -288,6 +288,7 @@ Count the frequency of kmers.
 
 sub histogram{
   my($self)=@_;
+  logmsg "Line ".__LINE__." in Bio::Kmer";
 
   if($self->{kmercounter} eq "jellyfish"){
     return $self->histogramJellyfish();
@@ -343,7 +344,6 @@ sub histogramPerl{
   }
 
   $self->{hist}=\@hist;
-  print Dumper \@hist;
   return \@hist;
 }
 
