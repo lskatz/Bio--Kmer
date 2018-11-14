@@ -6,7 +6,7 @@ use FindBin qw/$RealBin/;
 use IO::Uncompress::Gunzip qw/gunzip $GunzipError/;
 use Data::Dumper qw/Dumper/;
 
-use Test::More tests => 1;
+use Test::More tests => 17;
 
 use lib "$RealBin/../lib";
 use_ok 'Bio::Kmer';

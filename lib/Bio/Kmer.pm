@@ -390,13 +390,13 @@ sub countKmersPurePerl{
     }
   }
   
-  ($$self{kmerfileFh},$$self{kmerfile})      = tempfile("KMER.XXXXXX", DIR=>$$self{tempdir}, SUFFIX=>".tsv");
+  my($fh, $filename)                    = tempfile("KMER.XXXXXX", DIR=>$$self{tempdir}, SUFFIX=>".tsv");
+  ($$self{kmerfileFh},$$self{kmerfile}) = ($fh, $filename);
 
   # Write everything to file. The FH should still be open.
   #      Do not return the kmer.
   #      Make a new method that returns the kmer hash
   #      Do the same for jellyfish
-  my $fh=$self->{kmerfileFh};
   while(my($kmer,$count)=each(%kmer)){
     # Filtering step
     if($count < $self->{gt}){
@@ -407,7 +407,6 @@ sub countKmersPurePerl{
     print $fh "$kmer\t$count\n";
   }
   close $fh;
-  close $self->{kmerfileFh};
 
   return 1;
 }
