@@ -5,7 +5,7 @@
 
 package Bio::Kmer;
 require 5.10.0;
-our $VERSION=0.22;
+our $VERSION=0.23;
 
 use strict;
 use warnings;
@@ -33,12 +33,21 @@ our @richseqExt=qw(.gbk .gbf .gb .embl);
 our @sffExt=qw(.sff);
 our @samExt=qw(.sam .bam);
 
-our $fhStick :shared; # Helps us open only one file at a time
+our $fhStick :shared;      # Helps us open only one file at a time
+our $enqueueStick :shared; # Helps control access to the kmer queue
 
 
 # TODO if 'die' is imported by a script, redefine
 # sig die in that script as this function.
 local $SIG{'__DIE__'} = sub { my $e = $_[0]; $e =~ s/(at [^\s]+? line \d+\.$)/\nStopped $1/; die("$0: ".(caller(1))[3].": ".$e); };
+
+my $startTime = time();
+sub logmsg{
+  local $0 = basename $0; 
+  my $tid=threads->tid;
+  my $elapsedTime = time() - $startTime;
+  print STDERR "$0.$tid $elapsedTime @_\n";
+}
 
 =pod
 
@@ -357,24 +366,32 @@ sub countKmersPurePerl{
   }
   close $fastqFh;
 
+  # The number of sequences per thread is divided evenly but cautions
+  # toward having one extra sequence per thread in the first threads
+  # rather than accidentally leaving some off at the end.
   my $numSeqsPerThread = int(scalar(@allSeqs)/$self->{numcpus}) + 1;
 
   # Multithreading
   my @thr;
   for(0..$self->{numcpus}-1){
+    # Get a set of sequences to kmerize
     my @threadSeqs = splice(@allSeqs, 0, $numSeqsPerThread);
+    # Set up a place for kmers to land
     $thr[$_]=threads->new(\&_countKmersPurePerlWorker,$kmerlength,\@threadSeqs,$self->{sample});
-    #print STDERR "Kicking off thread ".$thr[$_]->tid." with ".scalar(@threadSeqs)." sequences\n";
+    #logmsg "Kicking off thread ".$thr[$_]->tid." with ".scalar(@threadSeqs)." sequences";
   }
   
   # Join the threads and put everything into a large kmer hash
-  my %kmer=();
+  my %kmer;
   for(@thr){
-    my $threadKmer=$_->join;
-    for my $kmer(keys(%$threadKmer)){
-      $kmer{$kmer}+=$$threadKmer{$kmer};
+    #logmsg "Joining ".$_->tid;
+    my $kmerArr =  $_->join;
+    for my $kmer(@$kmerArr){
+      $kmer{$kmer}++;
     }
+    #logmsg "Done";
   }
+  #logmsg "Done merging";
 
   # Write everything to file. The FH should still be open.
   #      Do not return the kmer.
@@ -550,7 +567,7 @@ sub _checkCompatibility{
 sub _countKmersPurePerlWorker{
   my($kmerlength,$seqArr,$sample)=@_; 
 
-  my %kmer;
+  my $outKmerArray=[];
   for my $seq(@$seqArr){
 
     my $numKmersInRead=length($seq)-$kmerlength;
@@ -559,12 +576,12 @@ sub _countKmersPurePerlWorker{
     # We must keep this loop optimized for speed.
     for(my $j=0;$j<$numKmersInRead;$j++){
       next if($sample < rand(1)); # subsample
-      $kmer{substr($seq,$j,$kmerlength)}++;
+      #$kmer{substr($seq,$j,$kmerlength)}++;
+      push(@$outKmerArray, substr($seq,$j,$kmerlength));
     }
 
   }
-
-  return \%kmer;
+  return $outKmerArray;
 }
 
 
