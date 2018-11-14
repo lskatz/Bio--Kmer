@@ -408,7 +408,9 @@ sub countKmersPurePerl{
     
     print $fh "$kmer\t$count\n";
   }
+  logmsg __LINE__;logmsg; 
   close $fh;
+  logmsg __LINE__;logmsg; system("cat ".$self->{kmerfileFh});
 
   return 1;
 }
