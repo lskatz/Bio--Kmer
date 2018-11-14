@@ -407,10 +407,10 @@ sub countKmersPurePerl{
     }
     
     print $fh "$kmer\t$count\n";
-    logmsg "$kmer\t$count";
   }
   logmsg __LINE__;logmsg; 
   close $fh;
+  close $self->{kmerfileFh};
   logmsg __LINE__;logmsg; system("head ".$self->{kmerfile});
 
   return 1;
