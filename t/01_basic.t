@@ -41,7 +41,7 @@ diag "Made it to line ".__LINE__;
 # Test pure perl
 my $kmer=Bio::Kmer->new(dirname($0)."/../data/rand.fastq.gz",{kmerlength=>8});
 diag "Made it to line ".__LINE__;
-my $hist=$kmer->histogram();
+my $hist=$kmer->histogram() || die Dumper $kmer;
 diag "Made it to line ".__LINE__;
 for(my $i=0;$i<@correctCounts;$i++){
   diag "d Frequency: ".$$hist[$i]." <=> $correctCounts[$i]";
