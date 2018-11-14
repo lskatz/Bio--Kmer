@@ -292,6 +292,7 @@ sub histogram{
   if($self->{kmercounter} eq "jellyfish"){
     return $self->histogramJellyfish();
   } else {
+    logmsg "Line ".__LINE__." in Bio::Kmer";
     return $self->histogramPerl();
   }
 }
@@ -342,6 +343,7 @@ sub histogramPerl{
   }
 
   $self->{hist}=\@hist;
+  print Dumper \@hist;
   return \@hist;
 }
 
@@ -354,7 +356,6 @@ sub countKmersPurePerl{
 
   # Save all seqs to an array, for passing out to individual threads.
   my $fastqFh=$self->openFastq($seqfile);
-  logmsg "Line ".__LINE__." in Bio::Kmer";
   my $i=0;
   my @buffer=();
   while(<$fastqFh>){ # burn the read ID line
@@ -366,7 +367,6 @@ sub countKmersPurePerl{
     <$fastqFh>;
   }
   close $fastqFh;
-  logmsg "Line ".__LINE__." in Bio::Kmer";
 
   # The number of sequences per thread is divided evenly but cautions
   # toward having one extra sequence per thread in the first threads
@@ -382,7 +382,6 @@ sub countKmersPurePerl{
     $thr[$_]=threads->new(\&_countKmersPurePerlWorker,$kmerlength,\@threadSeqs,$self->{sample});
     logmsg "Kicking off thread ".$thr[$_]->tid." with ".scalar(@threadSeqs)." sequences";
   }
-  logmsg "Line ".__LINE__." in Bio::Kmer";
   
   # Join the threads and put everything into a large kmer hash
   my %kmer;
@@ -394,7 +393,6 @@ sub countKmersPurePerl{
     }
     logmsg "Done";
   }
-  logmsg Dumper \%kmer;
 
   # Write everything to file. The FH should still be open.
   #      Do not return the kmer.
@@ -402,7 +400,6 @@ sub countKmersPurePerl{
   #      Do the same for jellyfish
   my $fh=$self->{kmerfileFh};
   while(my($kmer,$count)=each(%kmer)){
-    logmsg "$kmer\t$count";
     # Filtering step
     if($count < $self->{gt}){
       #delete($kmer{$kmer});
@@ -412,7 +409,6 @@ sub countKmersPurePerl{
     print $fh "$kmer\t$count\n";
   }
   close $fh;
-  logmsg "Line ".__LINE__." in Bio::Kmer";
 
   return 1;
 }
