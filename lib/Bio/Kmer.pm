@@ -412,6 +412,8 @@ sub countKmersPurePerl{
   close $fh;
   close $self->{kmerfileFh};
   logmsg __LINE__;logmsg; system("head ".$self->{kmerfile});
+  logmsg;
+  logmsg `wc -l $self->{kmerfile}`;
 
   return 1;
 }
