@@ -2,6 +2,7 @@ use strict;
 use warnings;
 use File::Basename qw/dirname/;
 use FindBin qw/$RealBin/;
+use Data::Dumper;
 
 use Test::More tests => 5;
 
@@ -25,7 +26,11 @@ is scalar(@$union), 62362, "Union of all kmers";
 
 warn "Testing to make sure there is a warning for incompatible kmer sets\n";
 my $invalidKmer = ["-1"];
+open(my $devnull,"/dev/null") or die "ERROR opening /dev/null: $!";
 eval{
+  $$kmer2{settings}{verbose}=0;
+  #delete($$kmer2{_kmers}); print Dumper $kmer2;
+  no warnings;
   $invalidKmer = $kmer2->intersection($kmer3);
 };
 is $$invalidKmer[0], "-1", "Correctly identified incompatible kmer objects";
