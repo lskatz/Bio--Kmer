@@ -11,7 +11,7 @@ use Test::More tests => 1;
 use lib "$RealBin/../lib";
 use_ok 'Bio::Kmer';
 
-exit;
+diag "Made it to line ".__LINE__;
 
 # expected histogram
 my @correctCounts=(
@@ -27,6 +27,7 @@ my @correctCounts=(
   17,
 # 6,
 );
+diag "Made it to line ".__LINE__;
 
 # expected query results
 my %query=(
@@ -35,10 +36,13 @@ my %query=(
   TTGGAGCTA=> -1, # invalid
   AAAAAAAA => 0,  # not found
 );
+diag "Made it to line ".__LINE__;
 
 # Test pure perl
 my $kmer=Bio::Kmer->new(dirname($0)."/../data/rand.fastq.gz",{kmerlength=>8});
+diag "Made it to line ".__LINE__;
 my $hist=$kmer->histogram();
+diag "Made it to line ".__LINE__;
 for(my $i=0;$i<@correctCounts;$i++){
   diag "d Frequency: ".$$hist[$i]." <=> $correctCounts[$i]";
   note "n Frequency: ".$$hist[$i]." <=> $correctCounts[$i]";
