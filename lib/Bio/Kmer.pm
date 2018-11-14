@@ -103,6 +103,7 @@ Create a new instance of the kmer counter.  One object per file.
   sample       1          Retain only a percentage of kmers.
                           1 is 100%; 0 is 0%
                           Only works with the perl kmer counter.
+  verbose      0          Print more messages.
 
   Examples:
   my $kmer=Bio::Kmer->new("file.fastq.gz",{kmercounter=>"jellyfish",numcpus=>4});
@@ -123,6 +124,7 @@ sub new{
   $$settings{kmercounter} ||="perl";
   $$settings{tempdir}     ||=tempdir("Kmer.pm.XXXXXX",TMPDIR=>1,CLEANUP=>1);
   $$settings{sample}        =1 if(!defined($$settings{sample}));
+  $$settings{verbose}     ||=0;
 
   # If the first parameter $seqfile is a Bio::SeqIO object,
   # then send it to a file to dovetail with the rest of
@@ -170,6 +172,7 @@ sub new{
     gt         =>$$settings{gt},
     kmercounter=>$$settings{kmercounter},
     sample     =>$$settings{sample},
+    verbose    =>$$settings{verbose},
 
     # Values that will be filled in after analysis
     _kmers     =>{},
@@ -451,7 +454,7 @@ Finds the union between two sets of kmers
 sub union{
   my($self,$other)=@_;
   
-  if(!$self->_checkCompatibility($other,{verbose=>1})){
+  if(!$self->_checkCompatibility($other)){
     die;
   }
 
@@ -484,7 +487,7 @@ Finds the intersection between two sets of kmers
 sub intersection{
   my($self,$other)=@_;
 
-  if(!$self->_checkCompatibility($other,{verbose=>1})){
+  if(!$self->_checkCompatibility($other)){
     die;
   }
 
@@ -517,7 +520,7 @@ Finds the set of kmers unique to this Bio::Kmer object.
 sub subtract{
   my($self,$other)=@_;
 
-  if(!$self->_checkCompatibility($other,{verbose=>1})){
+  if(!$self->_checkCompatibility($other)){
     die;
   }
 
@@ -534,10 +537,10 @@ sub subtract{
 # See if another Bio::Kmer is the same kind as this one.
 # Return Boolean
 sub _checkCompatibility{
-  my($self,$other,$settings)=@_;
+  my($self,$other)=@_;
 
   if($self->{kmerlength} != $other->{kmerlength}){
-    warn "WARNING: kmer lengths do not match\n" if($$settings{verbose});
+    warn "WARNING: kmer lengths do not match\n" if($self->{verbose});
     return 0;
   }
 
