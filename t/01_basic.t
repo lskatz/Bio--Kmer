@@ -38,6 +38,7 @@ my %query=(
 my $kmer=Bio::Kmer->new(dirname($0)."/../data/rand.fastq.gz",{kmerlength=>8});
 my $hist=$kmer->histogram();
 for(my $i=0;$i<@correctCounts;$i++){
+  diag "Frequency: ".$$hist[$i]." <=> $correctCounts[$i]";
   is $$hist[$i], $correctCounts[$i], "Freq of $i checks out";
 }
 for my $query(keys(%query)){
