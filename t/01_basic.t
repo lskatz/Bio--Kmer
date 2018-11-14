@@ -38,6 +38,7 @@ my %query=(
 my $infile = dirname($0)."/../data/rand.fastq.gz";
 diag "Reading infile $infile";
 my $kmer=Bio::Kmer->new(dirname($0)."/../data/rand.fastq.gz",{kmerlength=>8,kmercounter=>"perl"});
+diag Dumper $kmer;
 my $hist=$kmer->histogram() || die Dumper $kmer;
 for(my $i=0;$i<@correctCounts;$i++){
   is $$hist[$i], $correctCounts[$i], "Freq of $i checks out";
