@@ -187,7 +187,7 @@ sub new{
     _kmers     =>{},
   };
   # Add in some other temporary files
-  ($$self{kmerfileFh},$$self{kmerfile})      = tempfile("KMER.XXXXXX", DIR=>$$self{tempdir}, SUFFIX=>".tsv");
+  #($$self{kmerfileFh},$$self{kmerfile})      = tempfile("KMER.XXXXXX", DIR=>$$self{tempdir}, SUFFIX=>".tsv");
   ($$self{histfileFh},$$self{histfile})      = tempfile("HIST.XXXXXX", DIR=>$$self{tempdir}, SUFFIX=>".tsv");
   ($$self{jellyfishdbFh},$$self{jellyfishdb})= tempfile("JF.XXXXXX",   DIR=>$$self{tempdir}, SUFFIX=>".jf");
 
@@ -288,12 +288,10 @@ Count the frequency of kmers.
 
 sub histogram{
   my($self)=@_;
-  logmsg "Line ".__LINE__." in Bio::Kmer";
 
   if($self->{kmercounter} eq "jellyfish"){
     return $self->histogramJellyfish();
   } else {
-    logmsg "Line ".__LINE__." in Bio::Kmer";
     return $self->histogramPerl();
   }
 }
@@ -380,19 +378,19 @@ sub countKmersPurePerl{
     my @threadSeqs = splice(@allSeqs, 0, $numSeqsPerThread);
     # Set up a place for kmers to land
     $thr[$_]=threads->new(\&_countKmersPurePerlWorker,$kmerlength,\@threadSeqs,$self->{sample});
-    logmsg "Kicking off thread ".$thr[$_]->tid." with ".scalar(@threadSeqs)." sequences";
+    #logmsg "Kicking off thread ".$thr[$_]->tid." with ".scalar(@threadSeqs)." sequences";
   }
   
   # Join the threads and put everything into a large kmer hash
   my %kmer;
   for(@thr){
-    logmsg "Joining ".$_->tid;
     my $kmerArr =  $_->join;
     for my $kmer(@$kmerArr){
       $kmer{$kmer}++;
     }
-    logmsg "Done";
   }
+  
+  ($$self{kmerfileFh},$$self{kmerfile})      = tempfile("KMER.XXXXXX", DIR=>$$self{tempdir}, SUFFIX=>".tsv");
 
   # Write everything to file. The FH should still be open.
   #      Do not return the kmer.
@@ -408,12 +406,8 @@ sub countKmersPurePerl{
     
     print $fh "$kmer\t$count\n";
   }
-  logmsg __LINE__;logmsg; 
   close $fh;
   close $self->{kmerfileFh};
-  logmsg __LINE__;logmsg; system("head ".$self->{kmerfile});
-  logmsg;
-  logmsg `wc -l $self->{kmerfile}`;
 
   return 1;
 }
