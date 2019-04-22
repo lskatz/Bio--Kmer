@@ -23,10 +23,10 @@ WriteMakefile1(
     'threads::shared'=> 0,
     'Thread::Queue'  => 0,
     'Exporter'       => 0,
+    'Bio::Perl'      => 0,
   },
   TEST_REQUIRES => {
     'Test::More'     => 0.47,
-    'Bio::Perl'      => 0,
   },
   LICENSE => 'mit',
   MIN_PERL_VERSION => '5.10.0',
