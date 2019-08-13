@@ -1,7 +1,7 @@
 language: perl
 perl: 5.18-shrplib
 #env: PERL_CPANM_OPT="--mirror http://cpan.mirrors.travis-ci.org  --mirror http://cpan.cpantesters.org/ --mirror http://search.cpan.org/CPAN --cascade-search --local-lib . --notest --force --skip-satisfied" PATH=./bin:$PATH PERL5LIB=$PERL5LIB:lib/perl5
-env: PERL_CPANM_OPT="--verbose --notest --force --skip-satisfied"
+#env: PERL_CPANM_OPT="--verbose --notest --force --skip-satisfied"
 #addons:
 #  homebrew:
 #    taps: brewsci/bio
@@ -12,4 +12,7 @@ before_install:
   - "cd jellyfish-2.2.6/ && ./configure --prefix=`pwd` && make -j 1 && make install && cd -"
   - "export PATH=$PATH:`pwd`/jellyfish-2.2.6/bin"
   - "which jellyfish"
+  - "echo $PERL5LIB"
+  - "echo $PATH"
+  - "perl -MBio::Kmer -MData::Dumper -e 'print Dumper \%INC;'
 
