@@ -12,7 +12,7 @@ before_install:
   - "cd jellyfish-2.2.6/ && ./configure --prefix=`pwd` && make -j 1 && make install && cd -"
   - "export PATH=$PATH:`pwd`/jellyfish-2.2.6/bin"
   - "which jellyfish"
-    #- "echo $PERL5LIB"
-    #- "echo $PATH"
+  - "echo $PERL5LIB"
+  - "echo $PATH"
     #- "perl -MBio::Kmer -MData::Dumper -e 'print Dumper \%INC;'
 
