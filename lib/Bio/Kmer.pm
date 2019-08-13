@@ -16,6 +16,8 @@ use File::Temp qw/tempdir tempfile/;
 use File::Path qw/remove_tree/;
 use Data::Dumper qw/Dumper/;
 use IO::Uncompress::Gunzip;
+use File::Which qw/which/;
+use Carp qw/croak carp confess/;
 
 use threads;
 use threads::shared;
@@ -629,21 +631,6 @@ sub _dumpKmersJellyfish{
   }
 }
 
-# http://www.perlmonks.org/?node_id=761662
-sub which{
-  my($self,$exe)=@_;
-  
-  my $tool_path="";
-  for my $path ( split /:/, $ENV{PATH} ) {
-      if ( -f "$path/$exe" && -x "$path/$exe" ) {
-          $tool_path = "$path/$exe";
-          last;
-      }
-  }
-  
-  return $tool_path;
-}
-
 # Opens a fastq file in a thread-safe way.
 # Returns a file handle.
 sub openFastq{
@@ -654,7 +641,7 @@ sub openFastq{
   my($name,$dir,$ext)=fileparse($fastq,@fastqExt);
 
   if(!grep(/$ext/,@fastqExt)){
-    die "ERROR: could not read $fastq as a fastq file";
+    croak "ERROR: could not read $fastq as a fastq file";
   }
 
   # Open the file in different ways, depending on if it
@@ -663,7 +650,8 @@ sub openFastq{
   if($ext =~/\.gz$/){
     # use binary gzip if we can... why not take advantage
     # of the compiled binary's speedup?
-    if(-e "/usr/bin/gzip"){
+    my $gzip = which('gzip');
+    if(-e $gzip){
       open($fh,"gzip -cd $fastq | ") or die "ERROR: could not open $fastq for reading!: $!";
     }else{
       $fh=new IO::Uncompress::Gunzip($fastq) or die "ERROR: could not read $fastq: $!";
