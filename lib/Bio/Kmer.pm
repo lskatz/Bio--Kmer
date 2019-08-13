@@ -609,8 +609,12 @@ sub countKmersJellyfish{
   # Counting
   my $jellyfishCountOptions="-s 10000000 -m $kmerlength -o $outfile -t $self->{numcpus}";
   my $uncompressedFastq="$self->{tempdir}/$basename.fastq";
+  my $zcat = which("zcat");
   if($seqfile=~/\.gz$/i){
-    system("zcat $seqfile > $uncompressedFastq"); die if $?;
+    if(!-e $zcat){
+      croak "ERROR: could not find zcat in PATH for uncompressing $seqfile";
+    }
+    system("$zcat $seqfile > $uncompressedFastq"); die if $?;
     system("$$self{jellyfish} count $jellyfishCountOptions $uncompressedFastq");
   } else {
     system("$$self{jellyfish} count $jellyfishCountOptions $seqfile");
