@@ -614,10 +614,10 @@ sub countKmersJellyfish{
     if(!-e $zcat){
       croak "ERROR: could not find zcat in PATH for uncompressing $seqfile";
     }
-    system("$zcat $seqfile > $uncompressedFastq"); croak "ERROR uncompressing $seqfile" if $?;
-    system("$$self{jellyfish} count $jellyfishCountOptions $uncompressedFastq");
+    system("$zcat \Q$seqfile\E > $uncompressedFastq"); croak "ERROR uncompressing $seqfile" if $?;
+    system("$$self{jellyfish} count $jellyfishCountOptions \Q$uncompressedFastq\E");
   } else {
-    system("$$self{jellyfish} count $jellyfishCountOptions $seqfile");
+    system("$$self{jellyfish} count $jellyfishCountOptions \Q$seqfile\E");
   }
   close $self->{jellyfishdbFh};
   croak "Error: problem with jellyfish" if $?;
@@ -634,7 +634,7 @@ sub _dumpKmersJellyfish{
   # already have contents
   if(-s $kmerTsv < 1){
     my $lowerCount=$self->{gt}-1;
-    system("$$self{jellyfish} dump --lower-count=$lowerCount --column --tab -o $kmerTsv $jfDb");
+    system("$$self{jellyfish} dump --lower-count=$lowerCount --column --tab -o \Q$kmerTsv\E \Q$jfDb\E");
     croak "ERROR dumping kmers from jellyfish database $jfDb" if $?;
   }
 }
@@ -660,7 +660,7 @@ sub openFastq{
     # of the compiled binary's speedup?
     my $gzip = which('gzip');
     if(-e $gzip){
-      open($fh,"$gzip -cd $fastq | ") or croak "ERROR: could not open $fastq for reading!: $!";
+      open($fh,"$gzip -cd \Q$fastq\E | ") or croak "ERROR: could not open $fastq for reading!: $!";
     }else{
       $fh=new IO::Uncompress::Gunzip($fastq) or croak "ERROR: could not read $fastq using native perl module IO::Uncompress::Gunzip: $!";
     }
