@@ -5,6 +5,7 @@ use File::Temp qw/tempdir/;
 use FindBin qw/$RealBin/;
 use IO::Uncompress::Gunzip qw/gunzip $GunzipError/;
 use Data::Dumper qw/Dumper/;
+use File::Which qw/which/;
 
 use Test::More tests => 15;
 
@@ -36,9 +37,15 @@ my %query=(
 
 # Test JellyFish
 SKIP:{
-  my $jfVersion=`jellyfish --version`; chomp($jfVersion);
+  my $jellyfish = which("jellyfish");
+  if(! -e $jellyfish){
+    diag "Jellyfish not found in PATH. Skipping.";
+    skip("Jellyfish test", 14);
+  }
+    
+  my $jfVersion=`$jellyfish --version 2>/dev/null`; chomp($jfVersion);
   if($?){
-    diag "Jellyfish error and/or jellyfish not found. Skipping Jellyfish tests.";
+    diag "Jellyfish error and/or jellyfish version < 2. Skipping Jellyfish tests.";
     skip("Jellyfish test", 14);
   }
 

@@ -153,10 +153,11 @@ sub new{
     my $tempfile="$$settings{tempdir}/bioperl_input.fastq";
     my $out=Bio::SeqIO->new(-file=>">".$tempfile);
     while(my $seq=$seqfile->next_seq){
+      my $qual = $seq->qual || "I" x $seq->length;
       my $seqWithQual = Bio::Seq::Quality->new(
         # TODO preserve qual values if they exist, but
         # for now, it doesn't really matter.
-        -qual=> "I" x $seq->length,
+        -qual=> $qual,
         -seq => $seq->seq,
         -id  => $seq->id,
         -verbose => -1,
@@ -184,6 +185,9 @@ sub new{
     kmercounter=>$$settings{kmercounter},
     sample     =>$$settings{sample},
     verbose    =>$$settings{verbose},
+
+    # Jellyfish-specific
+    jellyfish  =>scalar(which("jellyfish")),
 
     # Values that will be filled in after analysis
     _kmers     =>{},
@@ -261,7 +265,7 @@ sub query{
     my $kmers=$self->kmers();
     $count=$$kmers{uc($query)} || 0;
   } elsif($self->{kmercounter} eq "jellyfish"){
-    open(my $queryFh, "jellyfish query ".$self->{jellyfishdb}." |") or die "ERROR: could not run jellyfish query: $!";
+    open(my $queryFh, "$$self{jellyfish} query ".$self->{jellyfishdb}." |") or die "ERROR: could not run jellyfish query: $!";
     my $db=$self->{jellyfishdb};
     my $tmp=`jellyfish query $db $query`;
     die "ERROR: could not run jellyfish query" if $?;
@@ -305,8 +309,8 @@ sub histogramJellyfish{
 
   # Run jellyfish histo
   my $jellyfishXopts = join(" ","-t", $self->{numcpus}, "-o", $self->{histfile}, $self->{jellyfishdb});
-  system("jellyfish histo $jellyfishXopts");
-  die "ERROR with jellyfish histo" if $?;
+  system("$$self{jellyfish} histo $jellyfishXopts");
+  croak "ERROR with jellyfish histo" if $?;
   
   # Read the output file
   my @hist=(0);
@@ -607,9 +611,9 @@ sub countKmersJellyfish{
   my $uncompressedFastq="$self->{tempdir}/$basename.fastq";
   if($seqfile=~/\.gz$/i){
     system("zcat $seqfile > $uncompressedFastq"); die if $?;
-    system("jellyfish count $jellyfishCountOptions $uncompressedFastq");
+    system("$$self{jellyfish} count $jellyfishCountOptions $uncompressedFastq");
   } else {
-    system("jellyfish count $jellyfishCountOptions $seqfile");
+    system("$$self{jellyfish} count $jellyfishCountOptions $seqfile");
   }
   close $self->{jellyfishdbFh};
   die "Error: problem with jellyfish" if $?;
@@ -626,7 +630,7 @@ sub _dumpKmersJellyfish{
   # already have contents
   if(-s $kmerTsv < 1){
     my $lowerCount=$self->{gt}-1;
-    system("jellyfish dump --lower-count=$lowerCount --column --tab -o $kmerTsv $jfDb");
+    system("$$self{jellyfish} dump --lower-count=$lowerCount --column --tab -o $kmerTsv $jfDb");
     die if $?;
   }
 }
