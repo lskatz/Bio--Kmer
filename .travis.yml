@@ -15,5 +15,5 @@ before_install:
   - "which jellyfish"
   - "echo $PERL5LIB"
   - "echo $PATH"
-  - "perl -MBio::Kmer -MData::Dumper -e 'print Dumper \%INC;'"
+    #- "perl -MBio::Kmer -MData::Dumper -e 'print Dumper \%INC;'"
 
