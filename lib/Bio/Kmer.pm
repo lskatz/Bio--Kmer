@@ -543,7 +543,7 @@ sub subtract{
   my($self,$other)=@_;
 
   if(!$self->_checkCompatibility($other)){
-    die;
+    croak "ERROR: trying to subtract two incompatible ".ref($self)." objects.";
   }
 
   my %subtractKmers = %{ $self->kmers };
@@ -562,7 +562,7 @@ sub _checkCompatibility{
   my($self,$other)=@_;
 
   if($self->{kmerlength} != $other->{kmerlength}){
-    warn "WARNING: kmer lengths do not match\n" if($self->{verbose});
+    carp "WARNING: kmer lengths do not match\n" if($self->{verbose});
     return 0;
   }
 
@@ -600,7 +600,7 @@ sub countKmersJellyfish{
   if($jfVersion =~ /(jellyfish\s+)?(\d+)?/){
     my $majorVersion=$2;
     if($majorVersion < 2){
-      die "ERROR: Jellyfish v2 or greater is required";
+      die "ERROR: Jellyfish v2 or greater is required for ".ref($self);
     }
   }
   
@@ -614,13 +614,13 @@ sub countKmersJellyfish{
     if(!-e $zcat){
       croak "ERROR: could not find zcat in PATH for uncompressing $seqfile";
     }
-    system("$zcat $seqfile > $uncompressedFastq"); die if $?;
+    system("$zcat $seqfile > $uncompressedFastq"); croak "ERROR uncompressing $seqfile" if $?;
     system("$$self{jellyfish} count $jellyfishCountOptions $uncompressedFastq");
   } else {
     system("$$self{jellyfish} count $jellyfishCountOptions $seqfile");
   }
   close $self->{jellyfishdbFh};
-  die "Error: problem with jellyfish" if $?;
+  croak "Error: problem with jellyfish" if $?;
 }
 
 sub _dumpKmersJellyfish{
@@ -635,7 +635,7 @@ sub _dumpKmersJellyfish{
   if(-s $kmerTsv < 1){
     my $lowerCount=$self->{gt}-1;
     system("$$self{jellyfish} dump --lower-count=$lowerCount --column --tab -o $kmerTsv $jfDb");
-    die if $?;
+    croak "ERROR dumping kmers from jellyfish database $jfDb" if $?;
   }
 }
 
@@ -660,12 +660,12 @@ sub openFastq{
     # of the compiled binary's speedup?
     my $gzip = which('gzip');
     if(-e $gzip){
-      open($fh,"gzip -cd $fastq | ") or die "ERROR: could not open $fastq for reading!: $!";
+      open($fh,"$gzip -cd $fastq | ") or croak "ERROR: could not open $fastq for reading!: $!";
     }else{
-      $fh=new IO::Uncompress::Gunzip($fastq) or die "ERROR: could not read $fastq: $!";
+      $fh=new IO::Uncompress::Gunzip($fastq) or croak "ERROR: could not read $fastq using native perl module IO::Uncompress::Gunzip: $!";
     }
   } else {
-    open($fh,"<",$fastq) or die "ERROR: could not open $fastq for reading!: $!";
+    open($fh,"<",$fastq) or croak "ERROR: could not open $fastq for reading!: $!";
   }
 
   return $fh;
