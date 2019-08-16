@@ -1,8 +1,11 @@
+.travis.yml
 data/rand.fastq.gz
 data/rand2.fastq.gz
 lib/Bio/Kmer.pm
+LICENSE.md
 Makefile.PL
 MANIFEST			This list of files
+README
 README.pod
 t/01_basic.t
 t/02_jellyfish.t
