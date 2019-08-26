@@ -101,6 +101,16 @@ A module for helping with kmer analysis. The basic methods help count kmers and 
 
 =pod
 
+=head1 VARIABLES
+
+=over
+
+=item $Bio::Kmer::iThreads
+
+Boolean describing whether the module instance is using threads
+
+=back
+
 =head1 METHODS
 
 =over
