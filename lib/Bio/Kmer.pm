@@ -616,8 +616,6 @@ Finds minimizer of each kmer
 
 =back
 
-=over
-
 =cut
 
 sub minimizers{
@@ -665,8 +663,6 @@ Finds minimizer of each kmer
   returns: hash ref, e.g., $hash = {AAA=>[TAAAT, AAAGG,...], ATT=>[GATTC,...]}}
 
 =back
-
-=over
 
 =cut
 
