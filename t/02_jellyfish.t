@@ -38,7 +38,7 @@ my %query=(
 # Test JellyFish
 SKIP:{
   my $jellyfish = which("jellyfish");
-  if(! -e $jellyfish){
+  if(!defined($jellyfish) or ! -e $jellyfish){
     #diag "Jellyfish not found in PATH. Skipping.";
     skip("Jellyfish not found in PATH.", 15);
   }
