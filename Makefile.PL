@@ -24,7 +24,7 @@ WriteMakefile1(
     'threads::shared'=> 0,
     'Thread::Queue'  => 0,
     'Exporter'       => 0,
-    'Bio::Perl'      => '1.7.8',
+    'Bio::Perl'      => '1.007004',
   },
   TEST_REQUIRES => {
     'Test::More'     => 0.47,
