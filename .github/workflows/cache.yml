@@ -23,5 +23,3 @@ jobs:
           install-modules-args: --with-develop --with-configure --force --notest
           enable-modules-cache: true
           multi-thread: true
-      - run: perl -V
-      - run: cpanm --installdeps .
