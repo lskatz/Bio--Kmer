@@ -80,6 +80,9 @@ A module for helping with kmer analysis.
   my $kmerHash=$kmer->kmers();
   my $countOfCounts=$kmer->histogram();
 
+  my $minimizers = $kmer->minimizers();
+  my $minimizerCluster = $kmer->minimizerCluster();
+
 The BioPerl way
 
   use strict;
