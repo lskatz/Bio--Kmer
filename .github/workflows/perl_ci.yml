@@ -14,6 +14,10 @@ jobs:
         #perl: [ '5.34', '5.32', '5.16.3' ]
     name: Perl ${{ matrix.perl }} on ${{ matrix.os }}
     steps:
+      - name: apt-get to prepare for cached perl packages
+        run:  |
+          sudo apt-get update -y
+          sudo apt-get install -y libdb-dev sqlite3 libgd-dev libsqlite3-dev libberkeleydb-perl libcdb-file-perl
       - uses: actions/checkout@v3
       - name: Set up perl
         uses: shogo82148/actions-setup-perl@v1
