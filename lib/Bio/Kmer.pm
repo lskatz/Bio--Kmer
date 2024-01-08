@@ -5,7 +5,7 @@
 
 package Bio::Kmer;
 require 5.10.0;
-our $VERSION=0.41;
+our $VERSION=0.50;
 
 use strict;
 use warnings;
@@ -79,6 +79,9 @@ A module for helping with kmer analysis.
   my $kmer=Bio::Kmer->new("file.fastq.gz",{kmercounter=>"jellyfish",numcpus=>4});
   my $kmerHash=$kmer->kmers();
   my $countOfCounts=$kmer->histogram();
+
+  my $minimizers = $kmer->minimizers();
+  my $minimizerCluster = $kmer->minimizerCluster();
 
 The BioPerl way
 
@@ -601,6 +604,85 @@ sub kmers{
   $self->{_kmers}=\%kmer;
 
   return \%kmer;
+}
+
+=pod
+
+=over
+
+=item $kmer->minimizers(5)
+
+Finds minimizer of each kmer
+
+  Arguments: length of minimizer (default: 5)
+  returns: hash ref, e.g., $hash = {AAAAA=>AAA, TAGGGT=>AGG,...}
+
+=back
+
+=cut
+
+sub minimizers{
+  my($self, $l) = @_;
+
+  if($self->{minimizer}){
+    return $self->{minimizer};
+  }
+
+  $l //= 5;
+  $$self{l} = $l;
+
+  my %minimizer;
+
+  my $numLmersPerKmer = $$self{kmerlength}-$l+1;
+
+  for my $kmer(keys(%{ $self->kmers})){
+    # Start findig the minimizer by seeding it with the first l-mer
+    my $minimizer = substr($kmer, 0, $l);
+    for(my $i=1; $i<$numLmersPerKmer; $i++){
+      my $candidate = substr($kmer, $i, $l);
+      if($candidate lt $minimizer){
+        $minimizer = $candidate;
+      }
+    }
+    $minimizer{$kmer} = $minimizer;
+  }
+
+  $self->{minimizer} = \%minimizer;
+
+  return \%minimizer;
+}
+
+=pod
+
+=over
+
+=item $kmer->minimizerCluster(5)
+
+Finds minimizer of each kmer
+
+  Arguments: length of minimizer (default: 5). 
+    Internally, calls $kmer->minimizer($l) 
+    If $kmer->minimizer has already been called, this parameter will be ignored.
+  returns: hash ref, e.g., $hash = {AAA=>[TAAAT, AAAGG,...], ATT=>[GATTC,...]}}
+
+=back
+
+=cut
+
+sub minimizerCluster{
+  my($self, $l) = @_;
+  if($$self{l}){
+    $l = $$self{l};
+  }
+
+  my %cluster;
+
+  my $minimizer = $self->minimizers($l);
+
+  for my $kmer(keys(%$minimizer)){
+    push(@{ $cluster{$$minimizer{$kmer}} }, $kmer);
+  }
+  return \%cluster;
 }
 
 =pod

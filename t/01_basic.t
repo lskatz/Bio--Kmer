@@ -6,7 +6,7 @@ use FindBin qw/$RealBin/;
 use IO::Uncompress::Gunzip qw/gunzip $GunzipError/;
 use Data::Dumper qw/Dumper/;
 
-use Test::More tests => 2;
+use Test::More tests => 3;
 
 use lib "$RealBin/../lib";
 use_ok 'Bio::Kmer';
@@ -80,4 +80,22 @@ subtest "pure perl kmer counting" => sub{
   cmp_ok($numSubsampledKmers, '<', $numKmers, "Subsample kmers are than the full count.");
 
   is($kmer->ntcount(), $ntcount, "total number of bp");
+};
+
+subtest "minimizers" => sub{
+  my $kmer=Bio::Kmer->new(dirname($0)."/../data/rand.fastq.gz",{kmerlength=>8,kmercounter=>"perl"});
+  my $cluster = $kmer->minimizerCluster(7);
+  
+  # Spot check a few
+  my %exp = (
+    AGACTTT => [sort qw(AGACTTTG TAGACTTT AGACTTTT CAGACTTT AGACTTTA GAGACTTT AGACTTTC)],
+    TAAGCCA => [sort qw(TTAAGCCA)],
+    AGCTTGC => [sort qw(AGCTTGCG TAGCTTGC AGCTTGCA AGCTTGCC)],
+  );
+  plan tests => scalar(keys(%exp));
+  
+  while(my($minimizer, $exp) = each(%exp)){
+    my @obs = sort @{ $$cluster{$minimizer}};
+    is_deeply(\@obs, $exp{$minimizer}, "Cluster of $minimizer");
+  }
 };
