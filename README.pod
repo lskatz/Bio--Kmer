@@ -16,6 +16,9 @@ A module for helping with kmer analysis.
   my $kmerHash=$kmer->kmers();
   my $countOfCounts=$kmer->histogram();
 
+  my $minimizers = $kmer->minimizers();
+  my $minimizerCluster = $kmer->minimizerCluster();
+
 The BioPerl way
 
   use strict;
@@ -186,6 +189,40 @@ Return actual kmers
 
   Arguments: None
   Returns:   Reference to a hash of kmers and their counts
+
+=back
+
+
+=cut
+
+=pod
+
+=over
+
+=item $kmer->minimizers(5)
+
+Finds minimizer of each kmer
+
+  Arguments: length of minimizer (default: 5)
+  returns: hash ref, e.g., $hash = {AAAAA=>AAA, TAGGGT=>AGG,...}
+
+=back
+
+
+=cut
+
+=pod
+
+=over
+
+=item $kmer->minimizerCluster(5)
+
+Finds minimizer of each kmer
+
+  Arguments: length of minimizer (default: 5). 
+    Internally, calls $kmer->minimizer($l) 
+    If $kmer->minimizer has already been called, this parameter will be ignored.
+  returns: hash ref, e.g., $hash = {AAA=>[TAAAT, AAAGG,...], ATT=>[GATTC,...]}}
 
 =back
 
