@@ -5,7 +5,7 @@
 
 package Bio::Kmer;
 require 5.10.0;
-our $VERSION=0.50;
+our $VERSION=0.51;
 
 use strict;
 use warnings;
@@ -102,7 +102,12 @@ The BioPerl way
 
 A module for helping with kmer analysis. The basic methods help count kmers and can produce a count of counts.  Currently this module only supports fastq format.  Although this module can count kmers with pure perl, it is recommended to give the option for a different kmer counter such as Jellyfish.
 
-=pod
+=head1 DEPENDENCIES
+
+  * BioPerl
+  * Jellyfish >=2
+  * Perl threads
+  * Perl >=5.10
 
 =head1 VARIABLES
 
