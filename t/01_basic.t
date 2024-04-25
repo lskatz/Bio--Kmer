@@ -48,7 +48,7 @@ subtest "pure perl kmer counting" => sub{
 
   plan tests => 19;
 
-  my $infile = $RealBin."/../data/rand.fastq.gz";
+  my $infile = $RealBin."/data/rand.fastq.gz";
   my $kmer=Bio::Kmer->new($infile,{kmerlength=>8,kmercounter=>"perl"});
   my $hist=$kmer->histogram() || die Dumper $kmer;
   for(my $i=0;$i<@correctCounts;$i++){
@@ -67,7 +67,7 @@ subtest "pure perl kmer counting" => sub{
 
   # Test subsampling: a subsample should have fewer kmers than
   # the full set but more than 0.
-  my $subsampleKmer=Bio::Kmer->new(dirname($0)."/../data/rand.fastq.gz",{kmerlength=>8,sample=>0.1});
+  my $subsampleKmer=Bio::Kmer->new($infile,{kmerlength=>8,sample=>0.1});
   my $subsampleHist=$kmer->histogram();
   my $subsampleKmerHash=$subsampleKmer->kmers();
   my $numSubsampledKmers = scalar(keys(%$subsampleKmerHash));
@@ -83,7 +83,8 @@ subtest "pure perl kmer counting" => sub{
 };
 
 subtest "minimizers" => sub{
-  my $kmer=Bio::Kmer->new(dirname($0)."/../data/rand.fastq.gz",{kmerlength=>8,kmercounter=>"perl"});
+  my $infile = $RealBin."/data/rand.fastq.gz";
+  my $kmer=Bio::Kmer->new($infile,{kmerlength=>8,kmercounter=>"perl"});
   my $cluster = $kmer->minimizerCluster(7);
   
   # Spot check a few

@@ -62,7 +62,7 @@ SKIP:{
     skip("Jellyfish test.", 15);
   }
 
-  my $kmerJf=Bio::Kmer->new($RealBin."/../data/rand.fastq.gz",{kmerlength=>8, kmercounter=>"jellyfish"});
+  my $kmerJf=Bio::Kmer->new($RealBin."/data/rand.fastq.gz",{kmerlength=>8, kmercounter=>"jellyfish"});
   my $histJf=$kmerJf->histogram();
   for(my $i=0;$i<@correctCounts;$i++){
     is $$histJf[$i], $correctCounts[$i], "Freq of $i checks out";
