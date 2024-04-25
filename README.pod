@@ -1,0 +1,319 @@
+=pod
+
+=head1 NAME
+
+Bio::Kmer - Helper module for Kmer Analysis.
+
+=head1 SYNOPSIS
+
+A module for helping with kmer analysis.
+
+  use strict;
+  use warnings;
+  use Bio::Kmer;
+  
+  my $kmer=Bio::Kmer->new("file.fastq.gz",{kmercounter=>"jellyfish",numcpus=>4});
+  my $kmerHash=$kmer->kmers();
+  my $countOfCounts=$kmer->histogram();
+
+  my $minimizers = $kmer->minimizers();
+  my $minimizerCluster = $kmer->minimizerCluster();
+
+The BioPerl way
+
+  use strict;
+  use warnings;
+  use Bio::SeqIO;
+  use Bio::Kmer;
+
+  # Load up any Bio::SeqIO object. Quality values will be
+  # faked internally to help with compatibility even if
+  # a fastq file is given.
+  my $seqin = Bio::SeqIO->new(-file=>"input.fasta");
+  my $kmer=Bio::Kmer->new($seqin);
+  my $kmerHash=$kmer->kmers();
+  my $countOfCounts=$kmer->histogram();
+
+=head1 DESCRIPTION
+
+A module for helping with kmer analysis. The basic methods help count kmers and can produce a count of counts.  Currently this module only supports fastq format.  Although this module can count kmers with pure perl, it is recommended to give the option for a different kmer counter such as Jellyfish.
+
+=head1 DEPENDENCIES
+
+  * BioPerl
+  * Jellyfish >=2
+  * Perl threads
+  * Perl >=5.10
+
+=head1 VARIABLES
+
+=over
+
+=item $Bio::Kmer::iThreads
+
+Boolean describing whether the module instance is using threads
+
+=back
+
+=head1 METHODS
+
+=over
+
+=item Bio::Kmer->new($filename, \%options)
+
+Create a new instance of the kmer counter.  One object per file. 
+
+  Filename can be either a file path or a Bio::SeqIO object.
+
+  Applicable arguments for \%options:
+  Argument     Default    Description
+  kmercounter  perl       What kmer counter software to use.
+                          Choices: Perl, Jellyfish.
+  kmerlength|k 21         Kmer length
+  numcpus      1          This module uses perl 
+                          multithreading with pure perl or 
+                          can supply this option to other 
+                          software like jellyfish.
+  gt           1          If the count of kmers is fewer 
+                          than this, ignore the kmer. This 
+                          might help speed analysis if you 
+                          do not care about low-count kmers.
+  sample       1          Retain only a percentage of kmers.
+                          1 is 100%; 0 is 0%
+                          Only works with the perl kmer counter.
+  verbose      0          Print more messages.
+
+  Examples:
+  my $kmer=Bio::Kmer->new("file.fastq.gz",{kmercounter=>"jellyfish",numcpus=>4});
+
+=back
+
+
+=cut
+
+=pod
+
+=over
+
+=item $kmer->ntcount()
+
+Returns the number of base pairs counted.
+In some cases such as when counting with Jellyfish,
+that number is not calculated; instead the length
+is calculated by the total length of kmers.
+Internally, this number is stored as $kmer->{_ntcount}.
+
+Note: internally runs $kmer->histogram() if
+$kmer->{_ntcount} is not initially found.
+
+  Arguments: None
+  Returns:   integer
+
+=back
+
+
+=cut
+
+=pod
+
+=over
+
+=item $kmer->count()
+
+Count kmers. This method is called as soon as new() is called
+and so you should never have to run this method.
+Internally caches the kmer counts to ram.
+
+  Arguments: None
+  Returns:   None
+
+=back
+
+
+=cut
+
+=pod
+
+=over
+
+=item $kmer->clearCache
+
+Clears kmer counts and histogram counts.  You should probably never use
+this method.
+
+  Arguments: None
+  Returns:   None
+
+=back
+
+
+=cut
+
+=pod
+
+=over
+
+=item $kmer->query($queryString)
+
+Query the set of kmers with your own query
+
+  Arguments: query (string)
+  Returns:   Count of kmers. 
+              0 indicates that the kmer was not found.
+             -1 indicates an invalid kmer (e.g., invalid length)
+
+=back
+
+
+=cut
+
+=pod
+
+=over
+
+=item $kmer->histogram()
+
+Count the frequency of kmers. Internally caches the histogram to ram.
+
+  Arguments: none
+  Returns:   Reference to an array of counts. The index of 
+             the array is the frequency.
+
+=back
+
+
+=cut
+
+=pod
+
+=over
+
+=item $kmer->kmers
+
+Return actual kmers
+
+  Arguments: None
+  Returns:   Reference to a hash of kmers and their counts
+
+=back
+
+
+=cut
+
+=pod
+
+=over
+
+=item $kmer->minimizers(5)
+
+Finds minimizer of each kmer
+
+  Arguments: length of minimizer (default: 5)
+  returns: hash ref, e.g., $hash = {AAAAA=>AAA, TAGGGT=>AGG,...}
+
+=back
+
+
+=cut
+
+=pod
+
+=over
+
+=item $kmer->minimizerCluster(5)
+
+Finds minimizer of each kmer
+
+  Arguments: length of minimizer (default: 5). 
+    Internally, calls $kmer->minimizer($l) 
+    If $kmer->minimizer has already been called, this parameter will be ignored.
+  returns: hash ref, e.g., $hash = {AAA=>[TAAAT, AAAGG,...], ATT=>[GATTC,...]}}
+
+=back
+
+
+=cut
+
+=pod
+
+=over
+
+=item $kmer->union($kmer2)
+
+Finds the union between two sets of kmers
+
+  Arguments: Another Bio::Kmer object
+  Returns:   List of kmers
+
+=back
+
+
+=cut
+
+=pod
+
+=over
+
+=item $kmer->intersection($kmer2)
+
+Finds the intersection between two sets of kmers
+
+  Arguments: Another Bio::Kmer object
+  Returns:   List of kmers
+
+=back
+
+
+=cut
+
+=pod
+
+=over
+
+=item $kmer->subtract($kmer2)
+
+Finds the set of kmers unique to this Bio::Kmer object.
+
+  Arguments: Another Bio::Kmer object
+  Returns:   List of kmers
+
+=back
+
+
+=cut
+
+=pod
+
+=over
+
+=item $kmer->close()
+
+Cleans the temporary directory and removes this object from 
+RAM. Good for when you might be counting kmers for many 
+things but want to keep your overhead low.
+
+  Arguments: None
+  Returns:   1
+
+=back
+
+
+=cut
+
+=pod
+
+=head1 COPYRIGHT AND LICENSE
+
+MIT license.  Go nuts.
+
+=head1 AUTHOR
+
+Author: Lee Katz <lkatz@cdc.gov>
+
+For additional help, go to https://github.com/lskatz/Bio--Kmer
+
+CPAN module at http://search.cpan.org/~lskatz/Bio-Kmer/
+
+
+=cut
+
