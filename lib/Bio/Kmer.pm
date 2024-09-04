@@ -496,6 +496,63 @@ sub histogramPerl{
   return \@hist;
 }
 
+=pod
+
+=over
+
+=item $kmer->next
+
+Returns the next kmer from the input. This is useful for
+iterating over all kmers in a file and not keeping it all in memory.
+
+  Arguments: None
+  Returns:   kmer (string)
+
+=back
+
+=cut
+
+sub next{
+  my($self)=@_;
+
+  die "TODO add the \$fh to the class and do not count all kmers right away.";
+  my @kmerBuffer = ();
+  my $fh //= $self->openFastq($self->{seqfile});
+
+  return sub {
+    # If we have anything on the buffer, return that
+    if(@kmerBuffer){
+      return shift(@kmerBuffer);
+    }
+
+    # If there is nothing left on the buffer, 
+    # then see if we can get another sequence
+    # But only if we are not at the end of the file
+    if(eof($fh)){
+      close $fh;
+      return undef;
+    } 
+
+    # Get the next sequence and add onto the buffer
+    while(my $id=<$fh>){
+      my $sequence = <$fh>;
+      my $plus     = <$fh>;
+      my $quality  = <$fh>;
+
+      chomp($id, $sequence, $plus, $quality);
+
+      my $numKmers = length($sequence) - $self->{kmerlength};
+      for(my $i=0; $i<$numKmers; $i++){
+        my $kmer = substr($sequence, $i, $self->{kmerlength});
+        push(@kmerBuffer, $kmer);
+      }
+
+      return shift(@kmerBuffer);
+    }
+  }
+
+}
+
 # Pure perl to make this standalone... the only reason
 # we are counting kmers in Perl instead of C.
 sub countKmersPurePerl{

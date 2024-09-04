@@ -1,4 +1,3 @@
-.travis.yml
 t/data/rand.fastq.gz
 t/data/rand2.fastq.gz
 lib/Bio/Kmer.pm
