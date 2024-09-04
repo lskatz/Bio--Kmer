@@ -500,19 +500,28 @@ sub histogramPerl{
 
 =over
 
-=item $kmer->next
+=item $kmer->iterator()
 
 Returns the next kmer from the input. This is useful for
 iterating over all kmers in a file and not keeping it all in memory.
 
   Arguments: None
-  Returns:   kmer (string)
+  Returns:   iterator (subroutine reference), which returns the next kmer (string)
+
+Example
+
+  my $kmerObj = Bio::Kmer->new("file.fastq.gz");
+  my $iter = $kmerObj->iterator;
+  while(my $kmer = $iter->()){
+    # Prints a string of the kmer
+    print $kmer,"\n";
+  }
 
 =back
 
 =cut
 
-sub next{
+sub iterator{
   my($self)=@_;
 
   die "TODO add the \$fh to the class and do not count all kmers right away.";
@@ -541,7 +550,7 @@ sub next{
 
       chomp($id, $sequence, $plus, $quality);
 
-      my $numKmers = length($sequence) - $self->{kmerlength};
+      my $numKmers = length($sequence) - $self->{kmerlength}+1;
       for(my $i=0; $i<$numKmers; $i++){
         my $kmer = substr($sequence, $i, $self->{kmerlength});
         push(@kmerBuffer, $kmer);
