@@ -77,6 +77,7 @@ A module for helping with kmer analysis.
   use Bio::Kmer;
   
   my $kmer=Bio::Kmer->new("file.fastq.gz",{kmercounter=>"jellyfish",numcpus=>4});
+  $kmer->count();
   my $kmerHash=$kmer->kmers();
   my $countOfCounts=$kmer->histogram();
 
@@ -209,6 +210,7 @@ sub new{
   # Initialize the object and then bless it
   my $self={
     seqfile    =>$seqfile,
+    seqFh      => undef, # file handle to $seqfile if using pure perl
     kmerlength =>$$settings{kmerlength},
     numcpus    =>$$settings{numcpus},
     tempdir    =>$$settings{tempdir},
@@ -242,7 +244,7 @@ sub new{
 
   bless($self);
 
-  $self->count; # start off the kmer counting ASAP
+  #$self->count; # start off the kmer counting ASAP
 
   return $self;
 }
@@ -653,6 +655,8 @@ Return actual kmers
 
 sub kmers{
   my($self)=@_;
+
+  die "TODO need to run $self->count in $self->kmers if not run already";
 
   # Look for the cached results before trying to read the file.
   return $self->{_kmers} if(keys(%{ $self->{_kmers} }) > 0);
