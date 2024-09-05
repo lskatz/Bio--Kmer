@@ -9,7 +9,7 @@ use Data::Dumper qw/Dumper/;
 use Test::More tests => 15;
 
 use lib "$RealBin/../lib";
-use_ok 'Bio::Kmer';
+use_ok 'Bio::Kmer::PP';
 
 # expected histogram
 my @correctCounts=(
@@ -35,9 +35,9 @@ my %query=(
 
 # Test reading a BioPerl object
 SKIP:{
-  if(! $Bio::Kmer::iThreads){
+  if(! $Bio::Kmer::PP::iThreads){
     skip("No perl threads loaded. Skipping", 14);
-    print $Bio::Kmer::iThreads; # avoid only used once warning
+    print $Bio::Kmer::PP::iThreads; # avoid only used once warning
   }
 
   eval{
@@ -52,7 +52,7 @@ SKIP:{
     # Make the bioperl input file
     gunzip ($RealBin."/data/rand.fastq.gz" => "$tempdir/bp.fastq") or die "ERROR: could not decompress rand.fastq.gz with gunzip: $!";
     my $seqin=Bio::SeqIO->new(-file=>"$tempdir/bp.fastq");
-    my $kmerBP=Bio::Kmer->new($seqin,{kmerlength=>8});
+    my $kmerBP=Bio::Kmer::PP->new($seqin,{kmerlength=>8});
     my $histBP=$kmerBP->histogram();
     for(my $i=0;$i<@correctCounts;$i++){
       is $$histBP[$i], $correctCounts[$i], "Freq of $i checks out";

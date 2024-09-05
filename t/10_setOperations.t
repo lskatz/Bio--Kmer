@@ -7,19 +7,19 @@ use Data::Dumper;
 use Test::More tests => 2;
 
 use lib "$RealBin/../lib";
-use_ok 'Bio::Kmer';
+use_ok 'Bio::Kmer::PP';
 
 # Pure perl
 subtest "pure perl kmer counting and databasing" => sub{
-  if(!$Bio::Kmer::iThreads){
+  if(!$Bio::Kmer::PP::iThreads){
     plan skip_all => "No perl threads detected. Will not test.";
-    diag $Bio::Kmer::iThreads; # avoid "only used once warning"
+    diag $Bio::Kmer::PP::iThreads; # avoid "only used once warning"
   }
   plan tests => 4;
 
-  my $kmer1=Bio::Kmer->new($RealBin."/data/rand.fastq.gz",{kmerlength=>8});
-  my $kmer2=Bio::Kmer->new($RealBin."/data/rand2.fastq.gz",{kmerlength=>8});
-  my $kmer3=Bio::Kmer->new($RealBin."/data/rand2.fastq.gz",{kmerlength=>7});
+  my $kmer1=Bio::Kmer::PP->new($RealBin."/data/rand.fastq.gz",{kmerlength=>8});
+  my $kmer2=Bio::Kmer::PP->new($RealBin."/data/rand2.fastq.gz",{kmerlength=>8});
+  my $kmer3=Bio::Kmer::PP->new($RealBin."/data/rand2.fastq.gz",{kmerlength=>7});
 
   my $subtraction = $kmer1->subtract($kmer2);
   note "Subtraction of kmers: ".scalar(@$subtraction);

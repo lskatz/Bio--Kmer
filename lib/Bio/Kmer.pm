@@ -303,8 +303,7 @@ sub ntcount{
 
 =item $kmer->count()
 
-Count kmers. This method is called as soon as new() is called
-and so you should never have to run this method.
+Count kmers.
 Internally caches the kmer counts to ram.
 
   Arguments: None
@@ -452,6 +451,12 @@ sub histogramJellyfish{
   my($self)=@_;
   
   close $self->{histfileFh};
+
+  if(!keys(%{ $$self{_kmers} } )){
+    $self->count;
+    $self->kmers;
+  }
+  #die Dumper $self;
 
   # Run jellyfish histo
   my $jellyfishXopts = join(" ","-t", $self->{numcpus}, "-o", $self->{histfile}, $self->{jellyfishdb});
@@ -656,7 +661,11 @@ Return actual kmers
 sub kmers{
   my($self)=@_;
 
-  die "TODO need to run $self->count in $self->kmers if not run already";
+  # Count the kmers if trying to get the kmers and we haven't counted yet.
+  if($$self{kmercounter} eq 'perl' && !defined($$self{kmerfile})){
+    logmsg "Counting!";
+    $self->count;
+  }
 
   # Look for the cached results before trying to read the file.
   return $self->{_kmers} if(keys(%{ $self->{_kmers} }) > 0);
